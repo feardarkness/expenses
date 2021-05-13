@@ -1,9 +1,8 @@
-import User from "./user";
-import List from "./list";
-import Login from "./login";
+import { createUserSchema, activateUserSchema } from "./user";
+import loginSchema from "./login";
 
 export default {
-  User,
-  List,
-  Login,
+  createUserSchema,
+  activateUserSchema,
+  loginSchema,
 };

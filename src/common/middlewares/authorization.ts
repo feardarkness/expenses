@@ -35,7 +35,7 @@ class AuthMiddleware {
         throw new Error(`Token keyword is not bearer`);
       }
 
-      decodedToken = (await JWT.verify(token, configs.jwt.secret)) as TokenDto;
+      decodedToken = (await JWT.verify(token, configs.jwt.secret)) as JWTTokenDto;
 
       const user = await usersService.findById(decodedToken.userId);
 
@@ -58,15 +58,15 @@ class AuthMiddleware {
    */
   userTypeAllowed(userTypes: UserType[]) {
     return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      if (!userTypes.includes(req.user.userType)) {
-        throw new ForbiddenError(`User type "${req.user.userType}" is not allowed on this route`);
+      if (!userTypes.includes(req.user.type)) {
+        throw new ForbiddenError(`User type "${req.user.type}" is not allowed on this route`);
       }
       next();
     };
   }
 }
 
-export interface TokenDto {
+export interface JWTTokenDto {
   exp: string;
   userId: string;
   issued: string;

@@ -1,13 +1,9 @@
 import { JSONSchemaType } from "ajv";
 import { UserDto } from "../../../components/users/users.dto";
 
-const userSchema: JSONSchemaType<UserDto> = {
+const createUserSchema: JSONSchemaType<UserDto> = {
   type: "object",
   properties: {
-    id: {
-      type: "string",
-      format: "uuid",
-    },
     age: {
       type: "integer",
       minimum: 0,
@@ -27,10 +23,54 @@ const userSchema: JSONSchemaType<UserDto> = {
     },
     password: {
       type: "string",
+      nullable: false,
     },
   },
   required: ["email", "password"],
   additionalProperties: false,
 };
 
-export default userSchema;
+interface ActivateUserQuery {
+  token: string;
+}
+
+const activateUserSchema: JSONSchemaType<ActivateUserQuery> = {
+  type: "object",
+  properties: {
+    token: {
+      type: "string",
+    },
+  },
+  required: ["token"],
+  additionalProperties: false,
+};
+
+interface UpdateUser {
+  firstName?: string;
+  lastName?: string;
+  age?: number;
+}
+
+const updateUserSchema: JSONSchemaType<UpdateUser> = {
+  type: "object",
+  properties: {
+    age: {
+      type: "integer",
+      minimum: 0,
+      maximum: 200,
+      nullable: true,
+    },
+    firstName: {
+      type: "string",
+      nullable: true,
+    },
+    lastName: {
+      type: "string",
+      nullable: true,
+    },
+  },
+  required: [],
+  additionalProperties: false,
+};
+
+export { createUserSchema, activateUserSchema, updateUserSchema };

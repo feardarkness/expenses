@@ -23,7 +23,7 @@ class LoginMiddleware {
    * @param next Function to call the next middleware
    */
   async validateLoginData(req: express.Request, res: express.Response, next: express.NextFunction) {
-    Validate.schema("Login", req.body);
+    Validate.schema("login", req.body);
     next();
   }
 

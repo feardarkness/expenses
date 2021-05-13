@@ -1,7 +1,6 @@
 import "reflect-metadata";
 import express from "express";
 
-import * as bodyParser from "body-parser";
 import debug from "debug";
 import configs from "./src/configs/index";
 import logger from "./src/common/logger";
@@ -16,13 +15,9 @@ import { LoginRoutes } from "./src/components/auth/login.routes";
 
 const app: express.Application = express();
 
-const port: Number = configs.app.PORT;
-
-const routes: Array<CommonRoutesConfig> = [];
-
 const debugLog: debug.IDebugger = debug("app");
 // here we are adding middleware to parse all incoming requests as JSON
-app.use(bodyParser.json());
+app.use(express.json());
 
 // // here we are adding middleware to allow cross-origin requests
 // app.use(cors());
@@ -41,6 +36,7 @@ app.use(bodyParser.json());
 
 // here we are adding the UserRoutes to our array,
 // after sending the Express.js application object to have the routes added to our app!
+const routes: Array<CommonRoutesConfig> = [];
 routes.push(new UserRoutes());
 routes.push(new LoginRoutes());
 
@@ -52,7 +48,9 @@ routes.forEach((route) => {
 
 // default route
 app.get("/", (req: express.Request, res: express.Response) => {
-  res.status(200).send(`Server up and running!`);
+  res.status(200).send({
+    message: `Server up and running!`,
+  });
 });
 
 // error handler

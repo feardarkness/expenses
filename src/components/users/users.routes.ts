@@ -3,6 +3,7 @@ import * as express from "express";
 import userController from "./users.controller";
 import userMiddleware from "./users.middleware";
 import authMiddleware from "../../common/middlewares/authorization";
+import validateMiddleware from "../../common/middlewares/validation";
 import asyncWrapper from "../../common/async-wrapper";
 import { UserType } from "../../common/enums/UserType";
 
@@ -12,36 +13,48 @@ export class UserRoutes extends CommonRoutesConfig {
   }
 
   initializeRoutes(): express.Router {
-    this.router.all("*", asyncWrapper(authMiddleware.tokenIsValid));
-
     this.router.post(
       "",
-      asyncWrapper(authMiddleware.userTypeAllowed([UserType.admin])),
-      asyncWrapper(userMiddleware.validateData),
+      asyncWrapper(validateMiddleware.validateData("createUserSchema", "body")),
       asyncWrapper(userMiddleware.validateEmailAlreadyExists),
       asyncWrapper(userMiddleware.validatePasswordComplexity),
       asyncWrapper(userController.createUser)
     );
 
+    this.router.put(
+      "/status",
+      asyncWrapper(validateMiddleware.validateData("activateUserSchema", "query")),
+      asyncWrapper(userController.updateStatus)
+    );
+
     this.router
-      .all(`/:userId`, (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        // this middleware function runs before any request to /users/:userId
-        // but it doesn't accomplish anything just yet---
-        // it simply passes control to the next applicable function below using next()
-        next();
-      })
-      .get(`/:userId`, (req: express.Request, res: express.Response) => {
-        res.status(200).send(`GET requested for id ${req.params.userId}`);
-      })
-      .put(`/:userId`, (req: express.Request, res: express.Response) => {
-        res.status(200).send(`PUT requested for id ${req.params.userId}`);
-      })
-      .patch(`/:userId`, (req: express.Request, res: express.Response) => {
-        res.status(200).send(`PATCH requested for id ${req.params.userId}`);
-      })
-      .delete(`/:userId`, (req: express.Request, res: express.Response) => {
-        res.status(200).send(`DELETE requested for id ${req.params.userId}`);
-      });
+      .all(
+        `/:userId`,
+        asyncWrapper(authMiddleware.tokenIsValid),
+        asyncWrapper(validateMiddleware.validateUuidInPath)
+        // (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        //   // this middleware function runs before any request to /users/:userId
+        //   next();
+        // }
+      )
+      .get(
+        `/:userId`,
+        asyncWrapper(authMiddleware.userTypeAllowed([UserType.admin, UserType.user])),
+        asyncWrapper(userController.getUserById)
+      )
+      .put(
+        `/:userId`,
+        asyncWrapper(authMiddleware.userTypeAllowed([UserType.user])),
+        asyncWrapper(validateMiddleware.validateData("updateUserSchema", "body")),
+        asyncWrapper(validateMiddleware.validateUuidInPath),
+        asyncWrapper(userController.updateUser)
+      )
+      .delete(
+        `/:userId`,
+        asyncWrapper(authMiddleware.userTypeAllowed([UserType.user])),
+        asyncWrapper(validateMiddleware.validateUuidInPath),
+        asyncWrapper(userController.deleteById)
+      );
 
     return this.router;
   }

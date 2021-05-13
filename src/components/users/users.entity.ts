@@ -1,5 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, Index } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Index, OneToMany } from "typeorm";
+import { UserStatus } from "../../common/enums/UserStatus";
 import { UserType } from "../../common/enums/UserType";
+import { Token } from "../tokens/tokens.entity";
 import { UserBasicDto } from "./users.dto";
 
 @Entity()
@@ -40,7 +42,14 @@ export class User {
     enum: UserType,
     default: UserType.user,
   })
-  userType: UserType;
+  type: UserType;
+
+  @Column({
+    type: "enum",
+    enum: UserStatus,
+    default: UserStatus.new,
+  })
+  status: UserStatus;
 
   @Column({
     type: "timestamp",
@@ -48,6 +57,9 @@ export class User {
     nullable: true,
   })
   updatedAt: Date;
+
+  @OneToMany(() => Token, (token) => token.user, { onDelete: "CASCADE" })
+  tokens: Token[];
 
   public basicData(): UserBasicDto {
     return {

@@ -2,6 +2,7 @@ import * as express from "express";
 import userService from "./users.service";
 import ValidationError from "../../common/errors/validation-error";
 import Validate from "../../common/validations/validate";
+import commonValidators from "../../common/validations/common-validators";
 
 class UsersMiddleware {
   private static instance: UsersMiddleware;
@@ -13,8 +14,18 @@ class UsersMiddleware {
     return UsersMiddleware.instance;
   }
 
-  async validateData(req: express.Request, res: express.Response, next: express.NextFunction) {
-    Validate.schema("User", req.body);
+  validateUserData(schemaType: string, pieceToValidate: string) {
+    return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      Validate.schema(schemaType, req[pieceToValidate]);
+      next();
+    };
+  }
+
+  async validateUuidInPath(req: express.Request, res: express.Response, next: express.NextFunction) {
+    const isValid = commonValidators.isUUID(req.params.userId);
+    if (!isValid) {
+      throw new ValidationError("The user identifier should be an UUID");
+    }
     next();
   }
 

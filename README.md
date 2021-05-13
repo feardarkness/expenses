@@ -1,12 +1,18 @@
-# Base REST API project with Typescript - Typeorm(Mysql) and Express
+# Simple Expenses Backend
 
-REST API.
+REST API with JWT auth.
 
 ## Requirements
 
-Node 12 or higher.
+Node 14 or higher.
 
-To work with node 14, better to change tsconfig.json from https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping
+Postgresql
+
+## Before you start
+
+1. Create a .env file (You can copy from .env.sample) with you system configurations.
+
+2. Create a new database with the name configured on the .env file.
 
 ## Create migrations
 
