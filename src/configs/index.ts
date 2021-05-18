@@ -3,6 +3,7 @@ import activationToken from "./activation-token";
 import app from "./app";
 import logs from "./logs";
 import mail from "./mail";
+import db from "./db";
 
 export default {
   jwt: jwtToken,
@@ -10,4 +11,5 @@ export default {
   app,
   logs,
   mail,
+  db,
 };

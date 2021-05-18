@@ -5,7 +5,7 @@ module.exports = {
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
-  synchronize: process.env.DB_SYNCHRONIZE || false, // TODO make it false, this is DESTRUCTIVE
+  synchronize: process.env.DB_SYNCHRONIZE || false,
   timezone: "Z",
   logging: process.env.DB_LOGGING || false,
   migrationsTableName: "migrations",

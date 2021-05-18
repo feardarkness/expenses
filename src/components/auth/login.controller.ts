@@ -16,7 +16,6 @@ export class LoginController {
   }
 
   async login(req: express.Request, res: express.Response) {
-    log;
     const token = await loginService.generateToken(req.user);
     const response: LoginDto = {
       token,

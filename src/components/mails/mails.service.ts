@@ -1,8 +1,8 @@
 import configs from "../../configs/index";
 import { CommonServicesConfig } from "../../common/common.services.config";
 import { MailWithTextInterface } from "../../common/interfaces/email-message";
-import Mail from "../../common/mail";
 import debug from "debug";
+import Mail from "../../common/mail";
 
 const debugInstance: debug.IDebugger = debug("app:mail-service");
 
@@ -17,14 +17,9 @@ class MailService extends CommonServicesConfig {
     return MailService.instance;
   }
 
-  sendEmail(email: MailWithTextInterface, waitForEmailSent = true) {
-    debugInstance("[sendEmail]", { email, waitForEmailSent });
-    if (waitForEmailSent) {
-      return Mail.sendEmailWithTextBody(email, this.apiKey);
-    } else {
-      Mail.sendEmailWithTextBody(email, this.apiKey);
-      return;
-    }
+  sendEmail(email: MailWithTextInterface) {
+    debugInstance("[sendEmail]", { email });
+    return Mail.sendEmailWithTextBody(email, this.apiKey);
   }
 }
 

@@ -1,8 +1,10 @@
+import "dotenv/config";
 import app from "../../../app";
 import request from "supertest";
-import { createConnection } from "typeorm";
+import { Connection, createConnection } from "typeorm";
+import sinon from "sinon";
 
-let connection;
+let connection: Connection;
 
 describe("User routes", () => {
   before(async () => {
@@ -13,8 +15,11 @@ describe("User routes", () => {
   describe("Create user", () => {
     it("should create a user", async () => {
       const response = await request(app).post("/users").send({
-        id: 1,
-        name: "Mike",
+        firstName: "Jhon",
+        lastName: "Snow",
+        age: 30,
+        email: "{{email}}",
+        password: "123",
       });
       console.log("response======================");
       console.log(response.body);
@@ -23,6 +28,9 @@ describe("User routes", () => {
   });
 
   after(async () => {
-    await connection.close();
+    if (connection) {
+      await connection.query("DELETE FROM user");
+      await connection.close();
+    }
   });
 });

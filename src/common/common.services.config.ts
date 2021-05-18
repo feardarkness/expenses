@@ -9,7 +9,7 @@ export abstract class CommonServicesConfig {
    */
   async searchByEmail(email: string) {
     const userRepository = getManager().getCustomRepository(UserRepository);
-    const user = await userRepository.findByEmail(email);
+    const user = await userRepository.findActiveByEmail(email);
     return user;
   }
 }
