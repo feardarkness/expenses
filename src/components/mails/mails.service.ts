@@ -19,6 +19,7 @@ class MailService extends CommonServicesConfig {
 
   sendEmail(email: MailWithTextInterface) {
     debugInstance("[sendEmail]", { email });
+
     return Mail.sendEmailWithTextBody(email, this.apiKey);
   }
 }

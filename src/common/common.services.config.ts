@@ -7,9 +7,15 @@ export abstract class CommonServicesConfig {
    * @param email Email to search
    * @returns {Promise<User>}
    */
-  async searchByEmail(email: string) {
+  async searchActiveByEmail(email: string) {
     const userRepository = getManager().getCustomRepository(UserRepository);
     const user = await userRepository.findActiveByEmail(email);
+    return user;
+  }
+
+  async searchByEmail(email: string) {
+    const userRepository = getManager().getCustomRepository(UserRepository);
+    const user = await userRepository.findByEmail(email);
     return user;
   }
 }

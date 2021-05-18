@@ -34,7 +34,7 @@ class LoginMiddleware {
    * @param next Function to call the next middleware
    */
   async credentialsAreValid(req: express.Request, res: express.Response, next: express.NextFunction) {
-    const user = await loginService.searchByEmail(req.body.email);
+    const user = await loginService.searchActiveByEmail(req.body.email);
     if (user === undefined) {
       throw new UnauthorizedError("Unauthorized");
     }

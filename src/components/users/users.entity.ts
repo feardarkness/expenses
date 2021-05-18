@@ -11,16 +11,23 @@ export class User {
 
   @Column({
     length: 100,
+    nullable: true,
   })
   firstName: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   lastName: string;
 
-  @Column()
+  @Column({
+    nullable: false,
+  })
   password: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   age: number;
 
   @Column({
@@ -34,6 +41,7 @@ export class User {
   @Column({
     type: "timestamp",
     default: () => "CURRENT_TIMESTAMP",
+    nullable: false,
   })
   createdAt: Date;
 
@@ -41,6 +49,7 @@ export class User {
     type: "enum",
     enum: UserType,
     default: UserType.user,
+    nullable: false,
   })
   type: UserType;
 
@@ -48,6 +57,7 @@ export class User {
     type: "enum",
     enum: UserStatus,
     default: UserStatus.new,
+    nullable: false,
   })
   status: UserStatus;
 
