@@ -15,6 +15,7 @@ class LoginService extends CommonServicesConfig {
 
   async generateToken(user: User): Promise<string> {
     // TODO add someKey to the token so we can deactivate if necessary (it would help with logout too)
+
     const token = await JWT.generateToken(
       {
         id: user.id,

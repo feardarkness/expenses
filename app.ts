@@ -9,9 +9,10 @@ import logger from "./src/common/logger";
 // import cors from "cors";
 
 import { CommonRoutesConfig } from "./src/common/common.routes.config";
-import { UserRoutes } from "./src/components/users/users.routes";
 import { ErrorInterface } from "./src/common/interfaces/error-interface";
+import { UserRoutes } from "./src/components/users/users.routes";
 import { LoginRoutes } from "./src/components/auth/login.routes";
+import { ThingRoutes } from "./src/components/thing/thing.routes";
 
 const app: express.Application = express();
 
@@ -37,6 +38,7 @@ app.use(express.json());
 // here we are adding the UserRoutes to our array,
 // after sending the Express.js application object to have the routes added to our app!
 const routes: Array<CommonRoutesConfig> = [];
+routes.push(new ThingRoutes());
 routes.push(new UserRoutes());
 routes.push(new LoginRoutes());
 

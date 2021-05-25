@@ -37,10 +37,10 @@ class AuthMiddleware {
 
       decodedToken = (await JWT.verify(token, configs.jwt.secret)) as JWTTokenDto;
 
-      const user = await usersService.findById(decodedToken.userId);
+      const user = await usersService.findById(decodedToken.id);
 
       if (user === undefined) {
-        throw new Error(`User with id ${decodedToken.userId} not found`);
+        throw new Error(`User with id ${decodedToken.id} not found`);
       }
 
       req.user = user;

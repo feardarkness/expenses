@@ -6,7 +6,7 @@ import asyncWrapper from "../../common/async-wrapper";
 import { UserType } from "../../common/enums/UserType";
 import thingController from "./thing.controller";
 
-export class UserRoutes extends CommonRoutesConfig {
+export class ThingRoutes extends CommonRoutesConfig {
   constructor() {
     super(express.Router(), "things");
   }
@@ -15,7 +15,7 @@ export class UserRoutes extends CommonRoutesConfig {
     this.router.post(
       "",
       asyncWrapper(authMiddleware.tokenIsValid),
-      asyncWrapper(authMiddleware.userTypeAllowed([UserType.admin])),
+      asyncWrapper(authMiddleware.userTypeAllowed([UserType.user])),
       asyncWrapper(validateMiddleware.validateData("thingSchema", "body")),
       asyncWrapper(thingController.create)
     );
@@ -24,12 +24,16 @@ export class UserRoutes extends CommonRoutesConfig {
       .all(
         `/:thingId`,
         asyncWrapper(authMiddleware.tokenIsValid),
-        asyncWrapper(authMiddleware.userTypeAllowed([UserType.admin])),
+        asyncWrapper(authMiddleware.userTypeAllowed([UserType.user])),
         asyncWrapper(authMiddleware.tokenIsValid),
-        asyncWrapper(validateMiddleware.validateUuidInPath)
+        asyncWrapper(validateMiddleware.validateUuidInPath("thingId"))
       )
       .get(`/:thingId`, asyncWrapper(thingController.getById))
-      .put(`/:thingId`, asyncWrapper(thingController.update))
+      .put(
+        `/:thingId`,
+        asyncWrapper(validateMiddleware.validateData("thingSchema", "body")),
+        asyncWrapper(thingController.update)
+      )
       .delete(`/:thingId`, asyncWrapper(thingController.delete));
 
     return this.router;

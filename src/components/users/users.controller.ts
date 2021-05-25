@@ -48,7 +48,7 @@ export class UserController {
     });
 
     res.status(201).json({
-      message: "An email was sent with a link to activate your user. The link is valid for six hours.",
+      message: "An email was sent with a link to activate your user. The link is valid for six hours",
     });
   }
 

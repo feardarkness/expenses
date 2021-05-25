@@ -20,12 +20,14 @@ class ValidateMiddleware {
     };
   }
 
-  async validateUuidInPath(req: express.Request, res: express.Response, next: express.NextFunction) {
-    const isValid = commonValidators.isUUID(req.params.userId);
-    if (!isValid) {
-      throw new ValidationError("The user identifier should be an UUID");
-    }
-    next();
+  validateUuidInPath(propertyName: string) {
+    return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      const isValid = commonValidators.isUUID(req.params[propertyName]);
+      if (!isValid) {
+        throw new ValidationError("The user identifier should be an UUID");
+      }
+      next();
+    };
   }
 }
 

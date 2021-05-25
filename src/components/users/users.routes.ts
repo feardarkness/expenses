@@ -31,7 +31,8 @@ export class UserRoutes extends CommonRoutesConfig {
       .all(
         `/:userId`,
         asyncWrapper(authMiddleware.tokenIsValid),
-        asyncWrapper(validateMiddleware.validateUuidInPath)
+        asyncWrapper(validateMiddleware.validateUuidInPath("userId")),
+        asyncWrapper(userMiddleware.validateUserAllowedByToken)
         // (req: express.Request, res: express.Response, next: express.NextFunction) => {
         //   // this middleware function runs before any request to /users/:userId
         //   next();
@@ -46,13 +47,11 @@ export class UserRoutes extends CommonRoutesConfig {
         `/:userId`,
         asyncWrapper(authMiddleware.userTypeAllowed([UserType.user])),
         asyncWrapper(validateMiddleware.validateData("updateUserSchema", "body")),
-        asyncWrapper(validateMiddleware.validateUuidInPath),
         asyncWrapper(userController.updateUser)
       )
       .delete(
         `/:userId`,
         asyncWrapper(authMiddleware.userTypeAllowed([UserType.user])),
-        asyncWrapper(validateMiddleware.validateUuidInPath),
         asyncWrapper(userController.deleteById)
       );
 

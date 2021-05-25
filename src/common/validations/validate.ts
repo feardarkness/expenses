@@ -33,7 +33,12 @@ class Validate {
 
       for (const err of validate.errors as DefinedError[]) {
         if (err.message) {
-          errors.push(`${err.dataPath} ${err.message}`.trim());
+          let errMessage = `${err.dataPath} ${err.message}`.trim();
+
+          if (err.params && "additionalProperty" in err.params) {
+            errMessage = `${errMessage} [${err.params.additionalProperty}]`;
+          }
+          errors.push(errMessage);
         } else {
           console.log("err not found======================");
           console.log(err);

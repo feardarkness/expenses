@@ -39,9 +39,11 @@ export class ThingController {
   async update(req: express.Request, res: express.Response) {
     log.trace(`[update]`, { id: req.params.thingId, body: req.body });
 
-    const thing = await thingService.updateById(req.params.thingId, req.body);
+    await thingService.updateById(req.params.thingId, req.body);
 
-    res.status(200).json(thing);
+    res.status(200).json({
+      message: "Thing updated successfully",
+    });
   }
 
   async delete(req: express.Request, res: express.Response) {
