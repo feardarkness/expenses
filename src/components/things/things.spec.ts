@@ -10,8 +10,8 @@ import { UserStatus } from "../../common/enums/UserStatus";
 import loginService from "../auth/login.service";
 
 import { UserType } from "../../common/enums/UserType";
-import thingService from "./thing.service";
-import { Thing } from "./thing.entity";
+import thingService from "./things.service";
+import { Thing } from "./things.entity";
 
 let expect = chai.expect;
 chai.use(sinonChai);
@@ -37,7 +37,8 @@ describe("Thing routes", () => {
     activeUser.status = UserStatus.active;
     activeUser.type = UserType.user;
     await repository.save(activeUser);
-    newUserActiveJWT = await loginService.generateToken(activeUser);
+    let { token } = await loginService.generateToken(activeUser);
+    newUserActiveJWT = token;
 
     const thingRepository = connection.getRepository(Thing);
 

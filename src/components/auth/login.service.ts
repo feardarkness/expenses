@@ -2,6 +2,7 @@ import { User } from "../users/users.entity";
 import JWT from "../../common/jwt";
 import configs from "../../configs/index";
 import { CommonServicesConfig } from "../../common/common.services.config";
+import RandomString from "../../common/random-string";
 
 class LoginService extends CommonServicesConfig {
   private static instance: LoginService;
@@ -13,9 +14,7 @@ class LoginService extends CommonServicesConfig {
     return LoginService.instance;
   }
 
-  async generateToken(user: User): Promise<string> {
-    // TODO add someKey to the token so we can deactivate if necessary (it would help with logout too)
-
+  async generateToken(user: User) {
     const token = await JWT.generateToken(
       {
         id: user.id,
@@ -28,8 +27,12 @@ class LoginService extends CommonServicesConfig {
       }
     );
 
-    // TODO store someKey in the database, relation with user is needed. Prob.one user can have more than one token active (multiple dispositives)
-    return token;
+    const refreshToken = await RandomString.generateSecureRandomString();
+
+    return {
+      token,
+      refreshToken,
+    };
   }
 }
 

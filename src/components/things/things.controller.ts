@@ -1,6 +1,6 @@
 import * as express from "express";
 import debug from "debug";
-import thingService from "./thing.service";
+import thingService from "./things.service";
 import log from "../../common/logger";
 import NotFoundError from "../../common/errors/not-found-error";
 

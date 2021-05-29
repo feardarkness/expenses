@@ -39,7 +39,8 @@ describe("User routes", () => {
     activeUser.status = UserStatus.active;
     activeUser.type = UserType.user;
     await repository.save(activeUser);
-    newUserActiveJWT = await loginService.generateToken(activeUser);
+    let { token } = await loginService.generateToken(activeUser);
+    newUserActiveJWT = token;
 
     newUser = new User();
     newUser.email = newUserEmail;
@@ -53,7 +54,8 @@ describe("User routes", () => {
     userToDelete.status = UserStatus.active;
     userToDelete.type = UserType.user;
     await repository.save(userToDelete);
-    userToDeleteJWT = await loginService.generateToken(userToDelete);
+    let { token: token2 } = await loginService.generateToken(userToDelete);
+    userToDeleteJWT = token2;
   });
 
   after(async () => {
@@ -119,7 +121,7 @@ describe("User routes", () => {
 
       expect(status).to.equal(400, "Status 400 should be returned if something is wrong");
       expect(body).to.deep.equal({
-        error: "The user identifier should be an UUID",
+        error: "The identifier should be an UUID",
         detail: [],
       });
     });

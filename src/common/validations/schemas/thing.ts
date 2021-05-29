@@ -1,5 +1,5 @@
 import { JSONSchemaType } from "ajv";
-import { ThingDto } from "../../../components/thing/thing.dto";
+import { ThingDto } from "../../../components/things/things.dto";
 
 const thingSchema: JSONSchemaType<ThingDto> = {
   type: "object",

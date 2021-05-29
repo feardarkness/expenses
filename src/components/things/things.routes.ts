@@ -4,7 +4,7 @@ import authMiddleware from "../../common/middlewares/authorization";
 import validateMiddleware from "../../common/middlewares/validation";
 import asyncWrapper from "../../common/async-wrapper";
 import { UserType } from "../../common/enums/UserType";
-import thingController from "./thing.controller";
+import thingController from "./things.controller";
 
 export class ThingRoutes extends CommonRoutesConfig {
   constructor() {
@@ -25,7 +25,6 @@ export class ThingRoutes extends CommonRoutesConfig {
         `/:thingId`,
         asyncWrapper(authMiddleware.tokenIsValid),
         asyncWrapper(authMiddleware.userTypeAllowed([UserType.user])),
-        asyncWrapper(authMiddleware.tokenIsValid),
         asyncWrapper(validateMiddleware.validateUuidInPath("thingId"))
       )
       .get(`/:thingId`, asyncWrapper(thingController.getById))

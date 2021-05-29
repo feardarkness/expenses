@@ -24,7 +24,7 @@ class ValidateMiddleware {
     return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
       const isValid = commonValidators.isUUID(req.params[propertyName]);
       if (!isValid) {
-        throw new ValidationError("The user identifier should be an UUID");
+        throw new ValidationError("The identifier should be an UUID");
       }
       next();
     };

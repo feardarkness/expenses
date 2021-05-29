@@ -1,6 +1,7 @@
 import { createUserSchema, activateUserSchema, updateUserSchema } from "./user";
 import loginSchema from "./login";
 import { thingSchema } from "./thing";
+import { expenseSchema, expenseUpdateSchema } from "./expense";
 
 export default {
   createUserSchema,
@@ -8,4 +9,6 @@ export default {
   updateUserSchema,
   loginSchema,
   thingSchema,
+  expenseSchema,
+  expenseUpdateSchema,
 };

@@ -2,6 +2,7 @@ import "reflect-metadata";
 import express from "express";
 
 import debug from "debug";
+import helmet from "helmet";
 import configs from "./src/configs/index";
 import logger from "./src/common/logger";
 // import * as winston from "winston";
@@ -12,13 +13,17 @@ import { CommonRoutesConfig } from "./src/common/common.routes.config";
 import { ErrorInterface } from "./src/common/interfaces/error-interface";
 import { UserRoutes } from "./src/components/users/users.routes";
 import { LoginRoutes } from "./src/components/auth/login.routes";
-import { ThingRoutes } from "./src/components/thing/thing.routes";
+import { ThingRoutes } from "./src/components/things/things.routes";
+import { ExpenseRoutes } from "./src/components/expenses/expenses.routes";
 
 const app: express.Application = express();
 
 const debugLog: debug.IDebugger = debug("app");
 // here we are adding middleware to parse all incoming requests as JSON
 app.use(express.json());
+
+// adding some secure headers
+app.use(helmet());
 
 // // here we are adding middleware to allow cross-origin requests
 // app.use(cors());
@@ -41,6 +46,7 @@ const routes: Array<CommonRoutesConfig> = [];
 routes.push(new ThingRoutes());
 routes.push(new UserRoutes());
 routes.push(new LoginRoutes());
+routes.push(new ExpenseRoutes());
 
 routes.forEach((route) => {
   debugLog(`Routes configured for ${route.getName()}`);

@@ -2,8 +2,8 @@ import { CRUD } from "../../common/interfaces/crud";
 import { getManager } from "typeorm";
 import { CommonServicesConfig } from "../../common/common.services.config";
 import debug from "debug";
-import { Thing } from "./thing.entity";
-import { ThingDto } from "./thing.dto";
+import { Thing } from "./things.entity";
+import { ThingDto } from "./things.dto";
 
 const debugInstance: debug.IDebugger = debug("app:thing-service");
 
