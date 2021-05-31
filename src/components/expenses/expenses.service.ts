@@ -6,6 +6,7 @@ import { Expense } from "./expenses.entity";
 import { ExpenseDto, ExpenseUpdateDto } from "./expenses.dto";
 import { Thing } from "../things/things.entity";
 import { User } from "../users/users.entity";
+import DateCommon from "../../common/date-common";
 
 const debugInstance: debug.IDebugger = debug("app:thing-service");
 
@@ -33,6 +34,8 @@ class ExpenseService extends CommonServicesConfig implements CRUD {
     user.id = resource.userId;
     expense.user = user;
 
+    expense.date = (DateCommon.parseDateFromString(resource.date) as unknown) as string;
+
     return expenseRepository.save(expense);
   }
 
@@ -54,7 +57,8 @@ class ExpenseService extends CommonServicesConfig implements CRUD {
         userId: user.id,
       },
       {
-        ...dataToUpdate,
+        amount: dataToUpdate.amount,
+        date: (DateCommon.parseDateFromString(dataToUpdate.date) as unknown) as string,
         updatedAt: new Date(),
       }
     );

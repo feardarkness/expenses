@@ -1,10 +1,11 @@
-import { EntityManager, getManager, LessThan } from "typeorm";
+import { EntityManager, getManager, MoreThan } from "typeorm";
 import { CommonServicesConfig } from "../../common/common.services.config";
 import { CRUD } from "../../common/interfaces/crud";
 import { TokenDto } from "./tokens.dto";
 import { Token } from "./tokens.entity";
 import configs from "../../configs";
 import DateCommon from "../../common/date-common";
+import { TokenType } from "../../common/enums/TokenType";
 
 class TokenService extends CommonServicesConfig implements CRUD {
   private static instance: TokenService;
@@ -28,12 +29,13 @@ class TokenService extends CommonServicesConfig implements CRUD {
     return tokenRepository.save(token);
   }
 
-  async findActiveToken(token: string) {
+  async findActivationToken(token: string) {
     const tokenRepository = getManager().getRepository(Token);
     return await tokenRepository.findOne({
       where: {
         token,
-        expiresAt: LessThan(DateCommon.getCurrentDate()),
+        type: TokenType.userActivation,
+        expiresAt: MoreThan(DateCommon.getCurrentDate()),
       },
     });
   }

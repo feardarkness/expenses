@@ -16,13 +16,13 @@ export class Thing {
   description: string;
 
   @Column({
-    type: "timestamp",
+    type: "timestamptz",
     default: () => "CURRENT_TIMESTAMP",
   })
   createdAt: Date;
 
   @Column({
-    type: "timestamp",
+    type: "timestamptz",
     onUpdate: "CURRENT_TIMESTAMP",
     nullable: true,
   })

@@ -74,12 +74,13 @@ class UserService extends CommonServicesConfig implements CRUD {
 
   async activateUser(activationToken: string) {
     const userRepository = getManager().getRepository(User);
-    const token = await tokensService.findActiveToken(activationToken);
+    const token = await tokensService.findActivationToken(activationToken);
+
     if (token === undefined) {
       throw new NotFoundError("Token not found or expired");
     }
 
-    return userRepository.update(token.user.id, {
+    return userRepository.update(token.userId, {
       status: UserStatus.active,
       updatedAt: DateCommon.getCurrentDate(),
     });

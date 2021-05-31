@@ -6,6 +6,7 @@ import log from "../logger";
 import usersService from "../../components/users/users.service";
 import { UserType } from "../enums/UserType";
 import ForbiddenError from "../errors/forbidden-error";
+import tokensBlacklistService from "../../components/tokens/tokens-blacklist.service";
 
 class AuthMiddleware {
   private static instance: AuthMiddleware;
@@ -36,6 +37,15 @@ class AuthMiddleware {
       }
 
       decodedToken = (await JWT.verify(token, configs.jwt.secret)) as JWTTokenDto;
+
+      const blackListedToken = await tokensBlacklistService.find(token);
+
+      if (blackListedToken !== undefined) {
+        throw new UnauthorizedError(`Token in blacklist: ${token}`);
+      }
+
+      req.decodedToken = decodedToken;
+      req.token = token;
 
       const user = await usersService.findById(decodedToken.id);
 

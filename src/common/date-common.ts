@@ -1,5 +1,7 @@
-import { add } from "date-fns";
-import { formatISO } from "date-fns";
+import { add, fromUnixTime } from "date-fns";
+import { formatISO, format, parse } from "date-fns";
+
+const COMMON_DATE_FORMAT = "yyyy-MM-dd";
 
 export default class DateCommon {
   /**
@@ -12,7 +14,7 @@ export default class DateCommon {
   }
 
   /**
-   * Return s the current date
+   * Returns the current date
    */
   static getCurrentDate(): Date {
     return new Date();
@@ -24,5 +26,21 @@ export default class DateCommon {
    */
   static getIsoDate(date: Date): string {
     return formatISO(date);
+  }
+
+  static formatDate(date: Date, formatToParse: string): string {
+    return format(date, formatToParse);
+  }
+
+  static formatDateWithoutTime(date: Date) {
+    return DateCommon.formatDate(date, COMMON_DATE_FORMAT);
+  }
+
+  static parseDateFromString(date: string) {
+    return parse(date, COMMON_DATE_FORMAT, new Date());
+  }
+
+  static dateFromUnixTime(unixTime: number) {
+    return fromUnixTime(unixTime);
   }
 }

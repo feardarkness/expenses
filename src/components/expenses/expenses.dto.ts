@@ -1,9 +1,15 @@
 export interface ExpenseDto {
-  amount: number;
+  amount: string;
   userId: string;
   thingId: string;
+  date: string;
 }
 
 export interface ExpenseUpdateDto {
-  amount: number;
+  amount: string;
+  date: string;
+}
+
+export interface ExpenseWithIdDTO extends ExpenseDto {
+  id: string;
 }

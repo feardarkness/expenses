@@ -1,7 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, Index, ManyToOne, JoinColumn } from "typeorm";
 import { TokenType } from "../../common/enums/TokenType";
-import { UserType } from "../../common/enums/UserType";
-import { UserBasicDto } from "../users/users.dto";
 import { User } from "../users/users.entity";
 
 @Entity()
@@ -19,14 +17,14 @@ export class Token {
   token: string;
 
   @Column({
-    type: "timestamp",
+    type: "timestamptz",
     default: () => "CURRENT_TIMESTAMP",
   })
   issuedAt: Date;
 
   @Column({
     nullable: false,
-    type: "timestamp",
+    type: "timestamptz",
   })
   expiresAt: Date;
 
@@ -42,4 +40,7 @@ export class Token {
     name: "user_id",
   })
   user: User;
+
+  @Column({ nullable: true, name: "user_id" })
+  userId: string;
 }

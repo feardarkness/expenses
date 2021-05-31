@@ -13,6 +13,7 @@ import { CommonRoutesConfig } from "./src/common/common.routes.config";
 import { ErrorInterface } from "./src/common/interfaces/error-interface";
 import { UserRoutes } from "./src/components/users/users.routes";
 import { LoginRoutes } from "./src/components/auth/login.routes";
+import { LogoutRoutes } from "./src/components/auth/logout.routes";
 import { ThingRoutes } from "./src/components/things/things.routes";
 import { ExpenseRoutes } from "./src/components/expenses/expenses.routes";
 
@@ -46,6 +47,7 @@ const routes: Array<CommonRoutesConfig> = [];
 routes.push(new ThingRoutes());
 routes.push(new UserRoutes());
 routes.push(new LoginRoutes());
+routes.push(new LogoutRoutes());
 routes.push(new ExpenseRoutes());
 
 routes.forEach((route) => {

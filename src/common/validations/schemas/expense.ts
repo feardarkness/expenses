@@ -5,8 +5,8 @@ const expenseSchema: JSONSchemaType<ExpenseDto> = {
   type: "object",
   properties: {
     amount: {
-      type: "number",
-      minimum: 0,
+      type: "string",
+      pattern: "^[0-9]{1,10}.[0-9]{2}$",
     },
     userId: {
       type: "string",
@@ -18,8 +18,12 @@ const expenseSchema: JSONSchemaType<ExpenseDto> = {
       minLength: 36,
       maxLength: 36,
     },
+    date: {
+      type: "string",
+      format: "date",
+    },
   },
-  required: ["amount", "userId", "thingId"],
+  required: ["amount", "userId", "thingId", "date"],
   additionalProperties: false,
 };
 
@@ -27,11 +31,15 @@ const expenseUpdateSchema: JSONSchemaType<ExpenseUpdateDto> = {
   type: "object",
   properties: {
     amount: {
-      type: "number",
-      minimum: 0,
+      type: "string",
+      pattern: "^[0-9]{1,10}.[0-9]{2}$",
+    },
+    date: {
+      type: "string",
+      format: "date",
     },
   },
-  required: ["amount"],
+  required: ["amount", "date"],
   additionalProperties: false,
 };
 
