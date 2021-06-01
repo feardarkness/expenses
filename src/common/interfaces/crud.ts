@@ -1,5 +1,5 @@
 export interface CRUD {
-  list: (limit: number, page: number) => Promise<any>;
+  list: (params: object, association?: any) => Promise<any>;
   create: (resource: any, association?: any) => Promise<any>;
   updateById: (resourceId: any, dataToUpdate: any, association?: any) => Promise<any>;
   findById: (resourceId: any, association?: any) => Promise<any>;

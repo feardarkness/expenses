@@ -12,13 +12,18 @@ export class ExpenseRoutes extends CommonRoutesConfig {
   }
 
   initializeRoutes(): express.Router {
-    this.router.post(
-      "",
-      asyncWrapper(authMiddleware.tokenIsValid),
-      asyncWrapper(authMiddleware.userTypeAllowed([UserType.user])),
-      asyncWrapper(validateMiddleware.validateData("expenseSchema", "body")),
-      asyncWrapper(expensesController.create)
-    );
+    this.router
+      .all(``, asyncWrapper(authMiddleware.tokenIsValid), asyncWrapper(authMiddleware.userTypeAllowed([UserType.user])))
+      .post(
+        "",
+        asyncWrapper(validateMiddleware.validateData("expenseSchema", "body")),
+        asyncWrapper(expensesController.create)
+      )
+      .get(
+        "",
+        asyncWrapper(validateMiddleware.validateData("expenseListSchema", "query")),
+        asyncWrapper(expensesController.list)
+      );
 
     this.router
       .all(

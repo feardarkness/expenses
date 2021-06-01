@@ -7,6 +7,8 @@ import { ExpenseDto, ExpenseUpdateDto } from "./expenses.dto";
 import { Thing } from "../things/things.entity";
 import { User } from "../users/users.entity";
 import DateCommon from "../../common/date-common";
+import { ExpenseListParamsInterface } from "../../common/interfaces/list-params";
+import PaginationQueryBuilder from "../../common/pagination-query-builder";
 
 const debugInstance: debug.IDebugger = debug("app:thing-service");
 
@@ -74,7 +76,26 @@ class ExpenseService extends CommonServicesConfig implements CRUD {
     });
   }
 
-  list: (limit: number, page: number) => Promise<any>;
+  async list(queryParams: ExpenseListParamsInterface, user: User) {
+    const expenseRepository = getManager().getRepository(Expense);
+    const query = PaginationQueryBuilder.buildQuery(queryParams);
+    query.where["userId"] = user.id;
+
+    const [expenses, total] = await Promise.all([
+      expenseRepository.find(query),
+      expenseRepository.count({
+        where: query.where,
+      }),
+    ]);
+
+    return {
+      expenses,
+      total,
+      limit: query.take,
+      offset: query.skip,
+    };
+  }
+
   patchById?: ((resourceId: any) => Promise<any>) | undefined;
 }
 

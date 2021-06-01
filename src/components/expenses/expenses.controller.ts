@@ -59,6 +59,19 @@ export class ExpenseController {
       message: "Expense deleted successfully",
     });
   }
+
+  async list(req: express.Request, res: express.Response) {
+    log.trace(`[list]`, { query: req.query });
+
+    const { expenses, total, limit, offset } = await expenseService.list(req.query, req.user);
+
+    res.status(200).json({
+      records: expenses,
+      total,
+      limit,
+      offset,
+    });
+  }
 }
 
 export default ExpenseController.getInstance();
