@@ -19,7 +19,7 @@ export class ExpenseController {
   async create(req: express.Request, res: express.Response) {
     log.trace(`[create]`, { body: req.body });
 
-    const expense = await expenseService.create(req.body);
+    const expense = await expenseService.create(req.body, req.user);
 
     res.status(201).json(expense.basicData());
   }

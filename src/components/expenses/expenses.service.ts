@@ -22,7 +22,7 @@ class ExpenseService extends CommonServicesConfig implements CRUD {
     return ExpenseService.instance;
   }
 
-  create(resource: ExpenseDto) {
+  create(resource: ExpenseDto, user: User) {
     const expenseRepository = getManager().getRepository(Expense);
 
     const expense = new Expense();
@@ -32,8 +32,6 @@ class ExpenseService extends CommonServicesConfig implements CRUD {
     thing.id = resource.thingId;
     expense.thing = thing;
 
-    const user = new User();
-    user.id = resource.userId;
     expense.user = user;
 
     expense.date = (DateCommon.parseDateFromString(resource.date) as unknown) as string;

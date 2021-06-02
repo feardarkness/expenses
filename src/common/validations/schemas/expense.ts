@@ -37,11 +37,6 @@ const expenseSchema: JSONSchemaType<ExpenseDto> = {
       type: "string",
       pattern: "^[0-9]{1,10}\\.[0-9]{2}$",
     },
-    userId: {
-      type: "string",
-      minLength: 36,
-      maxLength: 36,
-    },
     thingId: {
       type: "string",
       minLength: 36,
@@ -52,7 +47,7 @@ const expenseSchema: JSONSchemaType<ExpenseDto> = {
       format: "date",
     },
   },
-  required: ["amount", "userId", "thingId", "date"],
+  required: ["amount", "thingId", "date"],
   additionalProperties: false,
 };
 

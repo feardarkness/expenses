@@ -39,13 +39,6 @@ export class User {
   email: string;
 
   @Column({
-    type: "timestamptz",
-    default: () => "CURRENT_TIMESTAMP",
-    nullable: false,
-  })
-  createdAt: Date;
-
-  @Column({
     type: "enum",
     enum: UserType,
     default: UserType.user,
@@ -63,8 +56,16 @@ export class User {
 
   @Column({
     type: "timestamptz",
+    default: () => "CURRENT_TIMESTAMP",
+    nullable: false,
+  })
+  createdAt: Date;
+
+  @Column({
+    type: "timestamptz",
     onUpdate: "CURRENT_TIMESTAMP",
-    nullable: true,
+    default: () => "CURRENT_TIMESTAMP",
+    nullable: false,
   })
   updatedAt: Date;
 

@@ -26,7 +26,8 @@ let user1JWT: string;
 
 let user3JWT: string;
 
-let thing1: Thing;
+let thing1user1: Thing;
+let thing3user3: Thing;
 
 let expense1user1: Expense;
 let expense2user2: Expense;
@@ -66,45 +67,53 @@ describe("Expense routes", () => {
 
     const thingRepository = connection.getRepository(Thing);
 
-    thing1 = new Thing();
-    thing1.name = "A thing";
-    thing1.description = "A thing description";
-    await thingRepository.save(thing1);
+    thing1user1 = new Thing();
+    thing1user1.name = "A thing 1";
+    thing1user1.description = "A thing description 1";
+    thing1user1.user = user1;
+    await thingRepository.save(thing1user1);
 
-    let thing2 = new Thing();
-    thing2.name = "A thing 2";
-    thing2.description = "A thing description 2";
-    await thingRepository.save(thing2);
+    let thing2user2 = new Thing();
+    thing2user2.name = "A thing 2";
+    thing2user2.description = "A thing description 2";
+    thing2user2.user = user2;
+    await thingRepository.save(thing2user2);
+
+    thing3user3 = new Thing();
+    thing3user3.name = "A thing 3";
+    thing3user3.description = "A thing description 3";
+    thing3user3.user = user3;
+    await thingRepository.save(thing3user3);
 
     const expenseRepository = connection.getRepository(Expense);
 
     expense1user1 = new Expense();
     expense1user1.amount = "50.00";
-    expense1user1.thing = thing1;
+    expense1user1.thing = thing1user1;
     expense1user1.user = user1;
     await expenseRepository.save(expense1user1);
 
     expense2user2 = new Expense();
     expense2user2.amount = "500.00";
-    expense2user2.thing = thing2;
+    expense2user2.thing = thing2user2;
     expense2user2.user = user2;
     await expenseRepository.save(expense2user2);
 
     expense3user1 = new Expense();
     expense3user1.amount = "90.00";
-    expense3user1.thing = thing1;
+    expense3user1.thing = thing1user1;
     expense3user1.user = user1;
     await expenseRepository.save(expense3user1);
 
     expense4user3 = new Expense();
     expense4user3.amount = "90.00";
-    expense4user3.thing = thing1;
+    expense4user3.thing = thing3user3;
     expense4user3.user = user3;
     await expenseRepository.save(expense4user3);
 
     expense5user3 = new Expense();
     expense5user3.amount = "100.00";
-    expense5user3.thing = thing2;
+    expense5user3.thing = thing3user3;
     expense5user3.user = user3;
     await expenseRepository.save(expense5user3);
   });
@@ -148,7 +157,7 @@ describe("Expense routes", () => {
 
       expect(status).to.equal(200);
       expect(body.amount).to.equal("90.00");
-      expect(body.thingId).to.equal(thing1.id);
+      expect(body.thingId).to.equal(thing1user1.id);
       expect(body.userId).to.equal(user1.id);
     });
   });
@@ -311,12 +320,12 @@ describe("Expense routes", () => {
 
     it("should return expenses from an user, searching by thingId", async () => {
       const { body, status } = await request(app)
-        .get(`/expenses?thingId=${thing1.id}`)
+        .get(`/expenses?thingId=${thing3user3.id}`)
         .set("Authorization", `Bearer ${user3JWT}`);
 
       expect(status).to.equal(200);
 
-      expect(body.records).to.have.length(1);
+      expect(body.records).to.have.length(2);
     });
   });
 
@@ -328,8 +337,7 @@ describe("Expense routes", () => {
         .post("/expenses")
         .send({
           amount,
-          userId: user1.id,
-          thingId: thing1.id,
+          thingId: thing1user1.id,
           date,
         })
         .set("Authorization", `Bearer ${user1JWT}`);
@@ -344,8 +352,7 @@ describe("Expense routes", () => {
         .post("/expenses")
         .send({
           amount,
-          userId: user1.id,
-          thingId: thing1.id,
+          thingId: thing1user1.id,
           date,
         })
         .set("Authorization", `Bearer ${user1JWT}`);
@@ -353,7 +360,7 @@ describe("Expense routes", () => {
       expect(status).to.equal(201);
 
       expect(body.amount).to.equal(amount);
-      expect(body.thingId).to.equal(thing1.id);
+      expect(body.thingId).to.equal(thing1user1.id);
       expect(body.userId).to.equal(user1.id);
       expect(body.date).to.equal(date);
     });
@@ -364,12 +371,26 @@ describe("Expense routes", () => {
         .post("/expenses")
         .send({
           amount,
-          userId: user1.id,
-          thingId: thing1.id,
+          thingId: thing1user1.id,
         })
         .set("Authorization", `Bearer `);
 
       expect(status).to.equal(401);
+    });
+
+    it("should fail trying to create an expense with a thing from another user", async () => {
+      let amount = "90.70";
+      let date = "2021-05-23";
+      const { body, status } = await request(app)
+        .post("/expenses")
+        .send({
+          amount,
+          thingId: thing3user3.id,
+          date,
+        })
+        .set("Authorization", `Bearer ${user1JWT}`);
+
+      expect(status).to.equal(400);
     });
 
     it("should create an expense", async () => {
@@ -379,8 +400,7 @@ describe("Expense routes", () => {
         .post("/expenses")
         .send({
           amount,
-          userId: user1.id,
-          thingId: thing1.id,
+          thingId: thing1user1.id,
           date,
         })
         .set("Authorization", `Bearer ${user1JWT}`);
@@ -388,7 +408,7 @@ describe("Expense routes", () => {
       expect(status).to.equal(201);
 
       expect(body.amount).to.equal(amount);
-      expect(body.thingId).to.equal(thing1.id);
+      expect(body.thingId).to.equal(thing1user1.id);
       expect(body.userId).to.equal(user1.id);
       expect(body.date).to.equal(date);
     });

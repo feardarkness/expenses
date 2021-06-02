@@ -5,6 +5,7 @@ import validateMiddleware from "../../common/middlewares/validation";
 import asyncWrapper from "../../common/async-wrapper";
 import { UserType } from "../../common/enums/UserType";
 import expensesController from "./expenses.controller";
+import expensesMiddleware from "./expenses.middleware";
 
 export class ExpenseRoutes extends CommonRoutesConfig {
   constructor() {
@@ -17,6 +18,7 @@ export class ExpenseRoutes extends CommonRoutesConfig {
       .post(
         "",
         asyncWrapper(validateMiddleware.validateData("expenseSchema", "body")),
+        asyncWrapper(expensesMiddleware.thingBelongsToUser),
         asyncWrapper(expensesController.create)
       )
       .get(

@@ -23,8 +23,8 @@ export class Token {
   issuedAt: Date;
 
   @Column({
-    nullable: false,
     type: "timestamptz",
+    nullable: false,
   })
   expiresAt: Date;
 
@@ -41,6 +41,9 @@ export class Token {
   })
   user: User;
 
-  @Column({ nullable: true, name: "user_id" })
+  @Column({
+    nullable: false,
+    name: "user_id",
+  })
   userId: string;
 }

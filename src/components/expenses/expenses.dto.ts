@@ -1,6 +1,5 @@
 export interface ExpenseDto {
   amount: string;
-  userId: string;
   thingId: string;
   date: string;
 }

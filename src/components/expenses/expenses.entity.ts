@@ -17,7 +17,7 @@ export class Expense {
   })
   amount: string;
 
-  @Column({ nullable: true, name: "thing_id" })
+  @Column({ nullable: false, name: "thing_id" })
   thingId: string;
 
   @ManyToOne((type) => Thing, { onDelete: "RESTRICT" })
@@ -26,7 +26,10 @@ export class Expense {
   })
   thing: Thing;
 
-  @Column({ nullable: true, name: "user_id" })
+  @Column({
+    nullable: false,
+    name: "user_id",
+  })
   userId: string;
 
   @ManyToOne((type) => User, { onDelete: "RESTRICT" })
@@ -36,22 +39,24 @@ export class Expense {
   user: User;
 
   @Column({
-    nullable: false,
     type: "date",
+    nullable: false,
     default: () => "NOW()",
   })
   date: string;
 
   @Column({
     type: "timestamptz",
+    nullable: false,
     default: () => "CURRENT_TIMESTAMP",
   })
   createdAt: Date;
 
   @Column({
     type: "timestamptz",
+    nullable: false,
     onUpdate: "CURRENT_TIMESTAMP",
-    nullable: true,
+    default: () => "CURRENT_TIMESTAMP",
   })
   updatedAt: Date;
 
