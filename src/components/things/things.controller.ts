@@ -21,7 +21,7 @@ export class ThingController {
 
     const thing = await thingService.create(req.body, req.user);
 
-    res.status(201).json(thing);
+    res.status(201).json(thing.basicData());
   }
 
   async getById(req: express.Request, res: express.Response) {
@@ -33,7 +33,7 @@ export class ThingController {
       throw new NotFoundError("Thing not found");
     }
 
-    res.status(200).json(thing);
+    res.status(200).json(thing.basicData());
   }
 
   async update(req: express.Request, res: express.Response) {
@@ -62,7 +62,7 @@ export class ThingController {
     const { things, total, limit, offset } = await thingService.list(req.query, req.user);
 
     res.status(200).json({
-      records: things,
+      records: things.map((thing) => thing.basicData()),
       total,
       limit,
       offset,

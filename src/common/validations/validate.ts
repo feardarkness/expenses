@@ -13,6 +13,10 @@ class Validate {
     addFormats(this.validator);
   }
 
+  getValidator() {
+    return this.validator;
+  }
+
   static getInstance() {
     if (!Validate.instance) {
       Validate.instance = new Validate();

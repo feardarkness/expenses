@@ -1,5 +1,5 @@
 import { JSONSchemaType } from "ajv";
-import { ThingDto } from "../../../components/things/things.dto";
+import { ThingBasicDto, ThingDto } from "../../../components/things/things.dto";
 import { ThingListParamsInterface } from "../../interfaces/list-params";
 
 const thingListSchema: JSONSchemaType<ThingListParamsInterface> = {
@@ -48,4 +48,44 @@ const thingSchema: JSONSchemaType<ThingDto> = {
   additionalProperties: false,
 };
 
-export { thingSchema, thingListSchema };
+const thingBasicDataSchema: JSONSchemaType<ThingBasicDto> = {
+  type: "object",
+  properties: {
+    id: {
+      type: "string",
+      minLength: 36,
+      maxLength: 36,
+      nullable: false,
+    },
+    name: {
+      type: "string",
+      minLength: 3,
+      maxLength: 100,
+      nullable: false,
+    },
+    description: {
+      type: "string",
+      minLength: 3,
+      maxLength: 500,
+      nullable: false,
+    },
+    userId: {
+      type: "string",
+      minLength: 36,
+      maxLength: 36,
+      nullable: false,
+    },
+    createdAt: {
+      type: "string",
+      format: "date-time",
+    },
+    updatedAt: {
+      type: "string",
+      format: "date-time",
+    },
+  },
+  required: ["id", "name", "description", "userId", "createdAt", "updatedAt"],
+  additionalProperties: false,
+};
+
+export { thingSchema, thingListSchema, thingBasicDataSchema };

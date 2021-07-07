@@ -18,6 +18,13 @@ export class LoginRoutes extends CommonRoutesConfig {
       asyncWrapper(loginController.login)
     );
 
+    this.router.put(
+      "/token",
+      asyncWrapper(validateMiddleware.validateData("loginSchema", "body")),
+      asyncWrapper(loginMiddleware.credentialsAreValid),
+      asyncWrapper(loginController.login)
+    );
+
     return this.router;
   }
 }

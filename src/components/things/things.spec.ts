@@ -5,16 +5,25 @@ import { Connection, createConnection, getManager } from "typeorm";
 import sinon from "sinon";
 import chai from "chai";
 import sinonChai from "sinon-chai";
+import chaiJsonSchema from "chai-json-schema-ajv";
 import { User } from "../users/users.entity";
 import { UserStatus } from "../../common/enums/UserStatus";
 import loginService from "../auth/login.service";
+import addFormats from "ajv-formats";
+import Validate from "../../common/validations/validate";
 
 import { UserType } from "../../common/enums/UserType";
-import thingService from "./things.service";
 import { Thing } from "./things.entity";
+import { thingBasicDataSchema } from "../../common/validations/schemas/thing";
+
+chai.use(sinonChai);
+chai.use(
+  chaiJsonSchema.create({
+    ajv: Validate.getValidator(),
+  })
+);
 
 let expect = chai.expect;
-chai.use(sinonChai);
 
 let sinonSandbox: sinon.SinonSandbox;
 let connection: Connection;
@@ -134,6 +143,8 @@ describe("Thing routes", () => {
 
       expect(body.name).to.equal("a thing");
       expect(body.description).to.equal("a thing description");
+
+      expect(body).to.be.jsonSchema(thingBasicDataSchema);
 
       const thingRepository = getManager().getRepository(Thing);
       const thing = await thingRepository.findOne({

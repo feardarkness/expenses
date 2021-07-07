@@ -58,6 +58,10 @@ routes.forEach((route) => {
 
 // default route
 app.get("/", (req: express.Request, res: express.Response) => {
+  console.log("req.cookies======================");
+  console.log(req.cookies);
+  console.log("======================");
+
   res.status(200).send({
     message: `Server up and running!`,
   });

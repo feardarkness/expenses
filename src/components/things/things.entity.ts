@@ -1,5 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, Index, ManyToOne, JoinColumn } from "typeorm";
 import { User } from "../users/users.entity";
+import { ThingBasicDto } from "./things.dto";
+import DateCommon from "../../common/date-common";
 
 @Entity()
 export class Thing {
@@ -44,4 +46,15 @@ export class Thing {
     default: () => "CURRENT_TIMESTAMP",
   })
   updatedAt: Date;
+
+  public basicData(): ThingBasicDto {
+    return {
+      id: this.id,
+      name: this.name,
+      description: this.description,
+      userId: this.userId,
+      createdAt: DateCommon.getIsoDate(this.createdAt),
+      updatedAt: DateCommon.getIsoDate(this.updatedAt),
+    };
+  }
 }

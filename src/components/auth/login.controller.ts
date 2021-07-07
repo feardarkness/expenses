@@ -21,6 +21,7 @@ export class LoginController {
 
     const response: LoginDto = {
       token,
+      refreshToken,
       user: req.user.basicData(),
     };
 
@@ -30,7 +31,7 @@ export class LoginController {
         secure: true,
         httpOnly: true,
       })
-      .status(201)
+      .status(200)
       .json(response);
   }
 }
