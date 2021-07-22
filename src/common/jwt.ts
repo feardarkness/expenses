@@ -27,7 +27,7 @@ export default class JWT {
    * @param options Additional options
    * @returns {Promise<object>} A resolved promise with the token decoded
    */
-  static verify(token: string, secret: string, options: JsonWebToken.SignOptions = {}): Promise<object> {
+  static verify(token: string, secret: string, options: JsonWebToken.VerifyOptions = {}): Promise<object> {
     return new Promise((resolve, reject) => {
       JsonWebToken.verify(token, secret, options, (err, token) => {
         if (err || token === undefined) {

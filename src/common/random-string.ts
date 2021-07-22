@@ -9,6 +9,9 @@ export default class RandomString {
     });
   }
 
+  /**
+   * Generates a random string (length 21 by default)
+   */
   static async generateSecureRandomString() {
     return nanoid();
   }

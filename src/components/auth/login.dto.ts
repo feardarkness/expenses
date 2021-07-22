@@ -6,7 +6,11 @@ export interface LoginDto {
   user: UserBasicDto;
 }
 
-export interface LoginBodyDTO {
+export interface LoginBodyDto {
   email: string;
   password: string;
+}
+
+export interface RefreshTokenBodyDto {
+  refreshToken: string;
 }

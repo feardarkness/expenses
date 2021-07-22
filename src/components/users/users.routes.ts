@@ -30,7 +30,7 @@ export class UserRoutes extends CommonRoutesConfig {
     this.router
       .all(
         `/:userId`,
-        asyncWrapper(authMiddleware.tokenIsValid),
+        asyncWrapper(authMiddleware.validateToken()),
         asyncWrapper(validateMiddleware.validateUuidInPath("userId")),
         asyncWrapper(userMiddleware.validateUserAllowedByToken)
         // (req: express.Request, res: express.Response, next: express.NextFunction) => {

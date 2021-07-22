@@ -34,8 +34,9 @@ const expenseSchema: JSONSchemaType<ExpenseDto> = {
   type: "object",
   properties: {
     amount: {
-      type: "string",
-      pattern: "^[0-9]{1,10}\\.[0-9]{2}$",
+      type: "number",
+      multipleOf: 0.01,
+      minimum: 0,
     },
     thingId: {
       type: "string",
@@ -55,8 +56,9 @@ const expenseUpdateSchema: JSONSchemaType<ExpenseUpdateDto> = {
   type: "object",
   properties: {
     amount: {
-      type: "string",
-      pattern: "^[0-9]{1,10}\\.[0-9]{2}$",
+      type: "number",
+      multipleOf: 0.01,
+      minimum: 0,
     },
     date: {
       type: "string",

@@ -88,31 +88,31 @@ describe("Expense routes", () => {
     const expenseRepository = connection.getRepository(Expense);
 
     expense1user1 = new Expense();
-    expense1user1.amount = "50.00";
+    expense1user1.amount = 50.0;
     expense1user1.thing = thing1user1;
     expense1user1.user = user1;
     await expenseRepository.save(expense1user1);
 
     expense2user2 = new Expense();
-    expense2user2.amount = "500.00";
+    expense2user2.amount = 500.0;
     expense2user2.thing = thing2user2;
     expense2user2.user = user2;
     await expenseRepository.save(expense2user2);
 
     expense3user1 = new Expense();
-    expense3user1.amount = "90.00";
+    expense3user1.amount = 90.0;
     expense3user1.thing = thing1user1;
     expense3user1.user = user1;
     await expenseRepository.save(expense3user1);
 
     expense4user3 = new Expense();
-    expense4user3.amount = "90.00";
+    expense4user3.amount = 90.0;
     expense4user3.thing = thing3user3;
     expense4user3.user = user3;
     await expenseRepository.save(expense4user3);
 
     expense5user3 = new Expense();
-    expense5user3.amount = "100.00";
+    expense5user3.amount = 100.0;
     expense5user3.thing = thing3user3;
     expense5user3.user = user3;
     await expenseRepository.save(expense5user3);
@@ -167,7 +167,7 @@ describe("Expense routes", () => {
       const { body, status } = await request(app)
         .put(`/expenses/${expense3user1.id}`)
         .send({
-          amount: "1234.80",
+          amount: 1234.8,
           date: "2021-02-25",
         })
         .set("Authorization", `Bearer `);
@@ -179,7 +179,7 @@ describe("Expense routes", () => {
       const { body, status } = await request(app)
         .put(`/expenses/${expense2user2.id}`)
         .send({
-          amount: "1234.80",
+          amount: 1234.8,
           date: "2021-02-25",
         })
         .set("Authorization", `Bearer ${user1JWT}`);
@@ -191,7 +191,7 @@ describe("Expense routes", () => {
       const { body, status } = await request(app)
         .put(`/expenses/${expense3user1.id}`)
         .send({
-          amount: "444555.80",
+          amount: 444555.8,
           date: "2021-02-25",
         })
         .set("Authorization", `Bearer ${user1JWT}`);
@@ -331,7 +331,7 @@ describe("Expense routes", () => {
 
   describe("[POST /expenses]", () => {
     it("should fail if amount is negative", async () => {
-      let amount = "-90.7";
+      let amount = -90.7;
       let date = "2021-05-23";
       const { body, status } = await request(app)
         .post("/expenses")
@@ -346,7 +346,7 @@ describe("Expense routes", () => {
     });
 
     it("should work if amount is 0", async () => {
-      let amount = "0.00";
+      let amount = 0.0;
       let date = "2021-05-23";
       const { body, status } = await request(app)
         .post("/expenses")
@@ -379,7 +379,7 @@ describe("Expense routes", () => {
     });
 
     it("should fail trying to create an expense with a thing from another user", async () => {
-      let amount = "90.70";
+      let amount = 90.7;
       let date = "2021-05-23";
       const { body, status } = await request(app)
         .post("/expenses")
@@ -394,7 +394,7 @@ describe("Expense routes", () => {
     });
 
     it("should create an expense", async () => {
-      let amount = "90.70";
+      let amount = 90.7;
       let date = "2021-05-23";
       const { body, status } = await request(app)
         .post("/expenses")

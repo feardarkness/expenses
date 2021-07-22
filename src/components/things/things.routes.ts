@@ -13,7 +13,11 @@ export class ThingRoutes extends CommonRoutesConfig {
 
   initializeRoutes(): express.Router {
     this.router
-      .all("", asyncWrapper(authMiddleware.tokenIsValid), asyncWrapper(authMiddleware.userTypeAllowed([UserType.user])))
+      .all(
+        "",
+        asyncWrapper(authMiddleware.validateToken()),
+        asyncWrapper(authMiddleware.userTypeAllowed([UserType.user]))
+      )
       .post(
         "",
         asyncWrapper(validateMiddleware.validateData("thingSchema", "body")),
@@ -28,7 +32,7 @@ export class ThingRoutes extends CommonRoutesConfig {
     this.router
       .all(
         `/:thingId`,
-        asyncWrapper(authMiddleware.tokenIsValid),
+        asyncWrapper(authMiddleware.validateToken()),
         asyncWrapper(authMiddleware.userTypeAllowed([UserType.user])),
         asyncWrapper(validateMiddleware.validateUuidInPath("thingId"))
       )

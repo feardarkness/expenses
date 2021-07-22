@@ -3,7 +3,7 @@ import DateCommon from "../../common/date-common";
 import { thingSchema } from "../../common/validations/schemas/thing";
 import { Thing } from "../things/things.entity";
 import { User } from "../users/users.entity";
-import { ExpenseDto, ExpenseWithIdDTO } from "./expenses.dto";
+import { ExpenseDto, ExpenseWithIdDto } from "./expenses.dto";
 
 @Entity()
 export class Expense {
@@ -15,7 +15,7 @@ export class Expense {
     precision: 12,
     type: "decimal",
   })
-  amount: string;
+  amount: number;
 
   @Column({ nullable: false, name: "thing_id" })
   thingId: string;
@@ -60,7 +60,7 @@ export class Expense {
   })
   updatedAt: Date;
 
-  public basicData(): ExpenseWithIdDTO {
+  public basicData(): ExpenseWithIdDto {
     return {
       id: this.id,
       amount: this.amount,

@@ -13,7 +13,7 @@ export class LogoutRoutes extends CommonRoutesConfig {
   initializeRoutes(): express.Router {
     this.router.post(
       "",
-      asyncWrapper(authMiddleware.tokenIsValid),
+      asyncWrapper(authMiddleware.validateToken()),
       asyncWrapper(authMiddleware.userTypeAllowed([UserType.user])),
       asyncWrapper(logoutController.logout)
     );

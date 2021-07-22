@@ -34,6 +34,25 @@ export class LoginController {
       .status(200)
       .json(response);
   }
+
+  async refresh(req: express.Request, res: express.Response) {
+    const { token, refreshToken } = await loginService.generateToken(req.user);
+
+    const response: LoginDto = {
+      token,
+      refreshToken,
+      user: req.user.basicData(),
+    };
+
+    res
+      .cookie("token", refreshToken, {
+        expires: new Date(Date.now() + configs.jwt.refreshToken.expirationInMillis),
+        secure: true,
+        httpOnly: true,
+      })
+      .status(200)
+      .json(response);
+  }
 }
 
 export default LoginController.getInstance();

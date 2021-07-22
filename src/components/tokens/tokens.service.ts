@@ -40,7 +40,7 @@ class TokenService extends CommonServicesConfig implements CRUD {
     });
   }
 
-  list: (limit: number, page: number) => Promise<any>;
+  list: (params: object, association?: any) => Promise<any>;
   updateById: (resourceId: any, dataToUpdate: any) => Promise<any>;
   findById: (resourceId: any) => Promise<any>;
   deleteById: (resourceId: any) => Promise<any>;

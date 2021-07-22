@@ -19,48 +19,141 @@ class AuthMiddleware {
   }
 
   /**
-   * Validate the token, set req.user if the token is valid
-   * @param req
-   * @param res
-   * @param next
+   * Returns a middleware that will validate  a token
+   * @param ignoreExpiration true to return a function that will validate the token expiration, false to avoid that validation
+   * @returns () => {} Function that will validate the token
    */
-  async tokenIsValid(req: express.Request, res: express.Response, next: express.NextFunction) {
-    const authorizationToken = req.get("authorization");
-    let decodedToken;
-    try {
-      if (authorizationToken === undefined) {
-        throw new Error(`Token is not defined`);
+  validateToken(ignoreExpiration = false) {
+    return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      const authorizationToken = req.get("authorization");
+      let decodedToken;
+      try {
+        if (authorizationToken === undefined) {
+          throw new Error(`Token is not defined`);
+        }
+        const [tokenKeyword, token] = authorizationToken.split(" ");
+        if (tokenKeyword.toLocaleLowerCase() !== "bearer") {
+          throw new Error(`Token keyword is not bearer`);
+        }
+
+        decodedToken = (await JWT.verify(token, configs.jwt.secret, {
+          ignoreExpiration,
+        })) as JWTTokenDto;
+
+        const blackListedToken = await tokensBlacklistService.find(token);
+
+        if (blackListedToken !== undefined) {
+          throw new UnauthorizedError(`Token in blacklist: ${token}`);
+        }
+
+        req.decodedToken = decodedToken;
+        req.token = token;
+
+        const user = await usersService.findById(decodedToken.id);
+
+        if (user === undefined) {
+          throw new Error(`User with id ${decodedToken.id} not found`);
+        }
+
+        req.user = user;
+      } catch (err) {
+        log.error(`Authorization error`, { err, authorizationToken });
+        throw new UnauthorizedError(`Authorization token not provided or invalid`);
       }
-      const [tokenKeyword, token] = authorizationToken.split(" ");
-      if (tokenKeyword.toLocaleLowerCase() !== "bearer") {
-        throw new Error(`Token keyword is not bearer`);
-      }
 
-      decodedToken = (await JWT.verify(token, configs.jwt.secret)) as JWTTokenDto;
-
-      const blackListedToken = await tokensBlacklistService.find(token);
-
-      if (blackListedToken !== undefined) {
-        throw new UnauthorizedError(`Token in blacklist: ${token}`);
-      }
-
-      req.decodedToken = decodedToken;
-      req.token = token;
-
-      const user = await usersService.findById(decodedToken.id);
-
-      if (user === undefined) {
-        throw new Error(`User with id ${decodedToken.id} not found`);
-      }
-
-      req.user = user;
-    } catch (err) {
-      log.error(`Authorization error`, { err, authorizationToken });
-      throw new UnauthorizedError(`Authorization token not provided or invalid`);
-    }
-
-    next();
+      next();
+    };
   }
+
+  // /**
+  //  * Validate the token, set req.user if the token is valid
+  //  * @param req
+  //  * @param res
+  //  * @param next
+  //  */
+  // async tokenIsValid(req: express.Request, res: express.Response, next: express.NextFunction) {
+  //   const authorizationToken = req.get("authorization");
+  //   let decodedToken;
+  //   try {
+  //     if (authorizationToken === undefined) {
+  //       throw new Error(`Token is not defined`);
+  //     }
+  //     const [tokenKeyword, token] = authorizationToken.split(" ");
+  //     if (tokenKeyword.toLocaleLowerCase() !== "bearer") {
+  //       throw new Error(`Token keyword is not bearer`);
+  //     }
+
+  //     decodedToken = (await JWT.verify(token, configs.jwt.secret)) as JWTTokenDto;
+
+  //     const blackListedToken = await tokensBlacklistService.find(token);
+
+  //     if (blackListedToken !== undefined) {
+  //       throw new UnauthorizedError(`Token in blacklist: ${token}`);
+  //     }
+
+  //     req.decodedToken = decodedToken;
+  //     req.token = token;
+
+  //     const user = await usersService.findById(decodedToken.id);
+
+  //     if (user === undefined) {
+  //       throw new Error(`User with id ${decodedToken.id} not found`);
+  //     }
+
+  //     req.user = user;
+  //   } catch (err) {
+  //     log.error(`Authorization error`, { err, authorizationToken });
+  //     throw new UnauthorizedError(`Authorization token not provided or invalid`);
+  //   }
+
+  //   next();
+  // }
+
+  // /**
+  //  * Validate the token, set req.user if the token is valid. The token is valid even if is expired already
+  //  * @param req
+  //  * @param res
+  //  * @param next
+  //  */
+  // async tokenIsValidEvenExpired(req: express.Request, res: express.Response, next: express.NextFunction) {
+  //   const authorizationToken = req.get("authorization");
+  //   let decodedToken;
+  //   try {
+  //     if (authorizationToken === undefined) {
+  //       throw new Error(`Token is not defined`);
+  //     }
+  //     const [tokenKeyword, token] = authorizationToken.split(" ");
+  //     if (tokenKeyword.toLocaleLowerCase() !== "bearer") {
+  //       throw new Error(`Token keyword is not bearer`);
+  //     }
+
+  //     decodedToken = (await JWT.verify(token, configs.jwt.secret, {
+  //       ignoreExpiration: true,
+  //     })) as JWTTokenDto;
+
+  //     const blackListedToken = await tokensBlacklistService.find(token);
+
+  //     if (blackListedToken !== undefined) {
+  //       throw new UnauthorizedError(`Token in blacklist: ${token}`);
+  //     }
+
+  //     req.decodedToken = decodedToken;
+  //     req.token = token;
+
+  //     const user = await usersService.findById(decodedToken.id);
+
+  //     if (user === undefined) {
+  //       throw new Error(`User with id ${decodedToken.id} not found`);
+  //     }
+
+  //     req.user = user;
+  //   } catch (err) {
+  //     log.error(`Authorization error`, { err, authorizationToken });
+  //     throw new UnauthorizedError(`Authorization token not provided or invalid`);
+  //   }
+
+  //   next();
+  // }
 
   /**
    * Check if the user type is allowed to perform some action

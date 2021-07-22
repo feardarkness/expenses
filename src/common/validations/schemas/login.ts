@@ -1,7 +1,7 @@
 import { JSONSchemaType } from "ajv";
-import { LoginBodyDTO } from "../../../components/auth/login.dto";
+import { LoginBodyDto, RefreshTokenBodyDto } from "../../../components/auth/login.dto";
 
-const loginSchema: JSONSchemaType<LoginBodyDTO> = {
+const loginSchema: JSONSchemaType<LoginBodyDto> = {
   type: "object",
   properties: {
     email: {
@@ -15,4 +15,15 @@ const loginSchema: JSONSchemaType<LoginBodyDTO> = {
   additionalProperties: false,
 };
 
-export default loginSchema;
+const refreshSchema: JSONSchemaType<RefreshTokenBodyDto> = {
+  type: "object",
+  properties: {
+    refreshToken: {
+      type: "string",
+    },
+  },
+  required: ["refreshToken"],
+  additionalProperties: false,
+};
+
+export { loginSchema, refreshSchema };

@@ -25,7 +25,7 @@ class UserService extends CommonServicesConfig implements CRUD {
     return UserService.instance;
   }
 
-  list: (limit: number, page: number) => Promise<any>;
+  list: (params: object, association?: any) => Promise<any>;
 
   /**
    * Creates a user

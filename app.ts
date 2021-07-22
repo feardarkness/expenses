@@ -56,15 +56,21 @@ routes.forEach((route) => {
   app.use(`${configs.app.BASE_PATH}/${route.getName()}`, routerRoutes);
 });
 
-// default route
+// TEST ROUTES default route
 app.get("/", (req: express.Request, res: express.Response) => {
   console.log("req.cookies======================");
   console.log(req.cookies);
   console.log("======================");
 
-  res.status(200).send({
-    message: `Server up and running!`,
-  });
+  res.status(200).send([1, 2]);
+});
+
+app.post("/", (req: express.Request, res: express.Response) => {
+  console.log("req.cookies======================");
+  console.log(req.cookies);
+  console.log("======================");
+
+  res.status(200).send(req.body);
 });
 
 // error handler
