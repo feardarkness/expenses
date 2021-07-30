@@ -1,6 +1,8 @@
 import { CommonServicesConfig } from "../../common/common.services.config";
-import { getManager } from "typeorm";
+import { EntityManager, getManager } from "typeorm";
 import { TokenRefresh } from "./tokens-refresh.entity";
+import { User } from "../users/users.entity";
+import configs from "../../configs";
 
 class TokenRefreshService extends CommonServicesConfig {
   private static instance: TokenRefreshService;
@@ -13,9 +15,41 @@ class TokenRefreshService extends CommonServicesConfig {
   }
 
   find(token: string) {
-    const tokenBlacklistRepository = getManager().getRepository(TokenRefresh);
+    const tokenRefreshRepository = getManager().getRepository(TokenRefresh);
 
-    return tokenBlacklistRepository.findOne(token);
+    return tokenRefreshRepository.findOne(token);
+  }
+
+  async create(
+    { user, refreshToken, expirationDate }: { user: User; refreshToken: string; expirationDate: Date },
+    manager?: EntityManager
+  ) {
+    const refreshTokenRepository = manager
+      ? manager.getRepository(TokenRefresh)
+      : getManager().getRepository(TokenRefresh);
+
+    const token = new TokenRefresh();
+    token.token = refreshToken;
+    token.user = user;
+    token.expires = expirationDate;
+
+    const refreshTokenCreated = await refreshTokenRepository.save(token);
+    return refreshTokenCreated;
+  }
+
+  async remove(refreshToken: TokenRefresh) {
+    const refreshTokenRepository = getManager().getRepository(TokenRefresh);
+    return refreshTokenRepository.remove(refreshToken);
+  }
+
+  async removeAllOfUser(user: User, manager?: EntityManager) {
+    const refreshTokenRepository = manager
+      ? manager.getRepository(TokenRefresh)
+      : getManager().getRepository(TokenRefresh);
+
+    return refreshTokenRepository.delete({
+      user,
+    });
   }
 }
 

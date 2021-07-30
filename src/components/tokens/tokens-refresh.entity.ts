@@ -20,7 +20,12 @@ export class TokenRefresh {
 
   @Column({
     type: "timestamptz",
-    default: () => "CURRENT_TIMESTAMP",
   })
   expires: Date;
+
+  @Column({
+    type: "timestamptz",
+    default: () => "CURRENT_TIMESTAMP",
+  })
+  createdAt: Date;
 }

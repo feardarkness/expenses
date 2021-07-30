@@ -7,6 +7,8 @@ import usersService from "../../components/users/users.service";
 import { UserType } from "../enums/UserType";
 import ForbiddenError from "../errors/forbidden-error";
 import tokensBlacklistService from "../../components/tokens/tokens-blacklist.service";
+import tokensRefreshService from "../../components/tokens/tokens-refresh.service";
+import { nextDay } from "date-fns";
 
 class AuthMiddleware {
   private static instance: AuthMiddleware;
@@ -65,95 +67,30 @@ class AuthMiddleware {
     };
   }
 
-  // /**
-  //  * Validate the token, set req.user if the token is valid
-  //  * @param req
-  //  * @param res
-  //  * @param next
-  //  */
-  // async tokenIsValid(req: express.Request, res: express.Response, next: express.NextFunction) {
-  //   const authorizationToken = req.get("authorization");
-  //   let decodedToken;
-  //   try {
-  //     if (authorizationToken === undefined) {
-  //       throw new Error(`Token is not defined`);
-  //     }
-  //     const [tokenKeyword, token] = authorizationToken.split(" ");
-  //     if (tokenKeyword.toLocaleLowerCase() !== "bearer") {
-  //       throw new Error(`Token keyword is not bearer`);
-  //     }
+  /**
+   * Check if the refreshToken is valid; if found, delete it
+   * @param req
+   * @param res
+   * @param next
+   */
+  async validateRefreshToken(req: express.Request, res: express.Response, next: express.NextFunction) {
+    const refreshToken = await tokensRefreshService.find(req.body.refreshToken);
+    if (refreshToken === undefined) {
+      throw new UnauthorizedError("Unauthorized");
+    }
+    next();
+  }
 
-  //     decodedToken = (await JWT.verify(token, configs.jwt.secret)) as JWTTokenDto;
-
-  //     const blackListedToken = await tokensBlacklistService.find(token);
-
-  //     if (blackListedToken !== undefined) {
-  //       throw new UnauthorizedError(`Token in blacklist: ${token}`);
-  //     }
-
-  //     req.decodedToken = decodedToken;
-  //     req.token = token;
-
-  //     const user = await usersService.findById(decodedToken.id);
-
-  //     if (user === undefined) {
-  //       throw new Error(`User with id ${decodedToken.id} not found`);
-  //     }
-
-  //     req.user = user;
-  //   } catch (err) {
-  //     log.error(`Authorization error`, { err, authorizationToken });
-  //     throw new UnauthorizedError(`Authorization token not provided or invalid`);
-  //   }
-
-  //   next();
-  // }
-
-  // /**
-  //  * Validate the token, set req.user if the token is valid. The token is valid even if is expired already
-  //  * @param req
-  //  * @param res
-  //  * @param next
-  //  */
-  // async tokenIsValidEvenExpired(req: express.Request, res: express.Response, next: express.NextFunction) {
-  //   const authorizationToken = req.get("authorization");
-  //   let decodedToken;
-  //   try {
-  //     if (authorizationToken === undefined) {
-  //       throw new Error(`Token is not defined`);
-  //     }
-  //     const [tokenKeyword, token] = authorizationToken.split(" ");
-  //     if (tokenKeyword.toLocaleLowerCase() !== "bearer") {
-  //       throw new Error(`Token keyword is not bearer`);
-  //     }
-
-  //     decodedToken = (await JWT.verify(token, configs.jwt.secret, {
-  //       ignoreExpiration: true,
-  //     })) as JWTTokenDto;
-
-  //     const blackListedToken = await tokensBlacklistService.find(token);
-
-  //     if (blackListedToken !== undefined) {
-  //       throw new UnauthorizedError(`Token in blacklist: ${token}`);
-  //     }
-
-  //     req.decodedToken = decodedToken;
-  //     req.token = token;
-
-  //     const user = await usersService.findById(decodedToken.id);
-
-  //     if (user === undefined) {
-  //       throw new Error(`User with id ${decodedToken.id} not found`);
-  //     }
-
-  //     req.user = user;
-  //   } catch (err) {
-  //     log.error(`Authorization error`, { err, authorizationToken });
-  //     throw new UnauthorizedError(`Authorization token not provided or invalid`);
-  //   }
-
-  //   next();
-  // }
+  /**
+   * Delete all refresh tokens of the user
+   * @param req
+   * @param res
+   * @param next
+   */
+  async deleteAllRefreshTokensOfUser(req: express.Request, res: express.Response, next: express.NextFunction) {
+    await tokensRefreshService.removeAllOfUser(req.user);
+    next();
+  }
 
   /**
    * Check if the user type is allowed to perform some action

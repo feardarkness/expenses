@@ -6,7 +6,7 @@ import { Thing } from "./things.entity";
 import { ThingDto } from "./things.dto";
 import { User } from "../users/users.entity";
 import { ThingListParamsInterface } from "../../common/interfaces/list-params";
-import PaginationQueryBuilder from "../../common/pagination-query-builder";
+import ListQueryBuilder from "../../common/list-query-builder";
 
 const debugInstance: debug.IDebugger = debug("app:thing-service");
 
@@ -65,7 +65,7 @@ class ThingService extends CommonServicesConfig implements CRUD {
 
   async list(queryParams: ThingListParamsInterface, user: User) {
     const thingRepository = getManager().getRepository(Thing);
-    const query = PaginationQueryBuilder.buildQuery(queryParams);
+    const query = ListQueryBuilder.buildQuery(queryParams);
     query.where["userId"] = user.id;
 
     const [things, total] = await Promise.all([

@@ -167,8 +167,7 @@ describe("User routes", () => {
     it("should not be allowed to consume the route without a valid jwt", async () => {
       const createUserEmail = "tryingtoupdate@email.com";
       const { body, status } = await request(app).put(`/users/${activeUser.id}`).set("Authorization", `Bearer `).send({
-        firstName: "John",
-        lastName: "Snow",
+        fullName: "John Snow",
         age: 30,
         email: createUserEmail,
         password: "somePassword",
@@ -186,8 +185,7 @@ describe("User routes", () => {
         .put(`/users/${activeUser.id}`)
         .set("Authorization", `Bearer ${newUserActiveJWT}`)
         .send({
-          firstName: "John",
-          lastName: "Snow",
+          fullName: "John Snow",
           age: 30,
           email: createUserEmail,
           password: "somePassword",
@@ -205,8 +203,7 @@ describe("User routes", () => {
         .put(`/users/${activeUser.id}`)
         .set("Authorization", `Bearer ${newUserActiveJWT}`)
         .send({
-          firstName: "Updated",
-          lastName: "Updated",
+          fullName: "John Snow",
           age: 30,
         });
 
@@ -219,8 +216,7 @@ describe("User routes", () => {
       const updatedUser = await usersService.findById(activeUser.id);
 
       expect(updatedUser).to.not.be.undefined;
-      expect(updatedUser?.firstName).to.equal("Updated");
-      expect(updatedUser?.lastName).to.equal("Updated");
+      expect(updatedUser?.fullName).to.equal("John Snow");
       expect(updatedUser?.age).to.equal(30);
     });
   });
@@ -231,8 +227,7 @@ describe("User routes", () => {
 
       const createUserEmail = "someEmail@email.com";
       const { body, status } = await request(app).post("/users").send({
-        firstName: "John",
-        lastName: "Snow",
+        fullName: "John Snow",
         age: 30,
         email: createUserEmail,
         password: "somePassword",
@@ -275,8 +270,7 @@ describe("User routes", () => {
       const email = "duplicated@email.com";
 
       const { body, status } = await request(app).post("/users").send({
-        firstName: "John",
-        lastName: "Snow",
+        fullName: "John Snow",
         age: 30,
         email,
         password: "somePassword",
@@ -289,12 +283,31 @@ describe("User routes", () => {
       expect(body.error).to.equal(`User with email ${email} already registered`);
     });
 
+    it("should fail trying to register a name longer than 300", async () => {
+      sinonSandbox.stub(Mail, "sendEmailWithTextBody").resolves();
+
+      const email = "newOne112233@email.com";
+
+      const { body, status } = await request(app).post("/users").send({
+        fullName:
+          "wPWAslvNhqFUtVVtGzhfXkmPHCe6TVrxojwnA01DgrjEgIMYxRLYYjhoSeSIEuAGqgHsdWAnit21I7RiIRDNiNw3IVkYFOm0vx3wfERyjoACIi71eZKq8GWTC83YHyFpXqQdxOW3P3FxNuVxsYUXMTTzuviwzNNEIMOYi6a2ugTJjtve3QRjeOOjVFYRCYOVZaGaKl10SDvkolt9WG2p27NGaErN3SMGXL5ZMuqXqRBPCZYPnIyngttXRhh1CLIMakCyIOKC7kEAs5RhpeMrIhNlETzeXmigrAyZkxReoBS6e",
+        age: 30,
+        email,
+        password: "somePassword",
+      });
+
+      expect(Mail.sendEmailWithTextBody).to.not.been.called;
+      expect(status).to.equal(400, "Status 400 should be returned for validation errors");
+
+      expect(body).to.have.property("error");
+      expect(body.error).to.equal(`Invalid data`);
+    });
+
     it("should fail trying to register a user without email", async () => {
       sinonSandbox.stub(Mail, "sendEmailWithTextBody").resolves();
 
       const { body, status } = await request(app).post("/users").send({
-        firstName: "John",
-        lastName: "Snow",
+        fullName: "John Snow",
         password: "asdasdsa",
       });
 
@@ -313,8 +326,7 @@ describe("User routes", () => {
       const email = "duplicated@email.com";
 
       const { body, status } = await request(app).post("/users").send({
-        firstName: "John",
-        lastName: "Snow",
+        fullName: "John Snow",
         age: 30,
         email,
       });

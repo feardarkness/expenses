@@ -1,6 +1,6 @@
 import { ExpenseListParamsInterface } from "./interfaces/list-params";
 
-export default class PaginationQueryBuilder {
+export default class ListQueryBuilder {
   static buildOrderQuery(queryOrder: string | undefined, fieldToOrderByDefault: string) {
     const order = {};
 
@@ -21,7 +21,7 @@ export default class PaginationQueryBuilder {
         }
       });
     } else {
-      order[fieldToOrderByDefault] = "ASC";
+      order[fieldToOrderByDefault] = "DESC";
     }
     return order;
   }

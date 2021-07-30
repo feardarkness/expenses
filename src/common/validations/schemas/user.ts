@@ -10,13 +10,10 @@ const createUserSchema: JSONSchemaType<UserDto> = {
       maximum: 200,
       nullable: true,
     },
-    firstName: {
+    fullName: {
       type: "string",
       nullable: true,
-    },
-    lastName: {
-      type: "string",
-      nullable: true,
+      maxLength: 300,
     },
     email: {
       type: "string",
@@ -46,8 +43,7 @@ const activateUserSchema: JSONSchemaType<ActivateUserQuery> = {
 };
 
 interface UpdateUser {
-  firstName?: string;
-  lastName?: string;
+  fullName?: string;
   age?: number;
 }
 
@@ -60,13 +56,10 @@ const updateUserSchema: JSONSchemaType<UpdateUser> = {
       maximum: 200,
       nullable: true,
     },
-    firstName: {
+    fullName: {
       type: "string",
       nullable: true,
-    },
-    lastName: {
-      type: "string",
-      nullable: true,
+      maxLength: 300,
     },
   },
   required: [],

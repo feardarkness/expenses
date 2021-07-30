@@ -10,15 +10,10 @@ export class User {
   id: string;
 
   @Column({
-    length: 100,
+    length: 300,
     nullable: true,
   })
-  firstName: string;
-
-  @Column({
-    nullable: true,
-  })
-  lastName: string;
+  fullName: string;
 
   @Column({
     nullable: false,
@@ -77,8 +72,7 @@ export class User {
       email: this.email,
       id: this.id,
       age: this.age,
-      firstName: this.firstName,
-      lastName: this.lastName,
+      fullName: this.fullName,
     };
   }
 }

@@ -8,9 +8,9 @@ import { Thing } from "../things/things.entity";
 import { User } from "../users/users.entity";
 import DateCommon from "../../common/date-common";
 import { ExpenseListParamsInterface } from "../../common/interfaces/list-params";
-import PaginationQueryBuilder from "../../common/pagination-query-builder";
+import ListQueryBuilder from "../../common/list-query-builder";
 
-const debugInstance: debug.IDebugger = debug("app:thing-service");
+const debugInstance: debug.IDebugger = debug("app:expense-service");
 
 class ExpenseService extends CommonServicesConfig implements CRUD {
   private static instance: ExpenseService;
@@ -76,7 +76,7 @@ class ExpenseService extends CommonServicesConfig implements CRUD {
 
   async list(queryParams: ExpenseListParamsInterface, user: User) {
     const expenseRepository = getManager().getRepository(Expense);
-    const query = PaginationQueryBuilder.buildQuery(queryParams);
+    const query = ListQueryBuilder.buildQuery(queryParams);
     query.where["userId"] = user.id;
 
     const [expenses, total] = await Promise.all([

@@ -1,6 +1,5 @@
 export interface UserDto {
-  firstName?: string;
-  lastName?: string;
+  fullName?: string;
   age?: number;
   email: string;
   password: string;
@@ -8,8 +7,7 @@ export interface UserDto {
 
 export interface UserBasicDto {
   id: string;
-  firstName?: string;
-  lastName?: string;
+  fullName?: string;
   age?: number;
   email: string;
 }

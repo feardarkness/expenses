@@ -16,14 +16,16 @@ export class LoginRoutes extends CommonRoutesConfig {
       "",
       asyncWrapper(validateMiddleware.validateData("loginSchema", "body")),
       asyncWrapper(loginMiddleware.credentialsAreValid),
-      asyncWrapper(loginController.login)
+      asyncWrapper(authMiddleware.deleteAllRefreshTokensOfUser),
+      asyncWrapper(loginController.generateTokens)
     );
 
     this.router.post(
       "/refresh",
       asyncWrapper(validateMiddleware.validateData("refreshSchema", "body")),
       asyncWrapper(authMiddleware.validateToken(true)),
-      asyncWrapper(loginController.refresh)
+      asyncWrapper(authMiddleware.validateRefreshToken),
+      asyncWrapper(loginController.generateTokens)
     );
 
     return this.router;
