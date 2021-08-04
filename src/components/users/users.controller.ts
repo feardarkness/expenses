@@ -10,13 +10,14 @@ import RandomString from "../../common/random-string";
 import { TokenDto } from "../tokens/tokens.dto";
 import { getManager } from "typeorm";
 import { TokenType } from "../../common/enums/TokenType";
-import { config } from "process";
+import { UserStatus } from "../../common/enums/UserStatus";
 
 const debugInstance: debug.IDebugger = debug("app:user-controller");
 
 export class UserController {
   private static instance: UserController;
 
+  /* istanbul ignore next */
   static getInstance(): UserController {
     if (!UserController.instance) {
       UserController.instance = new UserController();
@@ -84,25 +85,24 @@ export class UserController {
   }
 
   async sendActivationEmail(req: express.Request, res: express.Response) {
-    log.trace(`[sendActivationEmail]`, { email: req.query.email });
+    log.trace(`[sendActivationEmail]`, { email: req.body.email });
 
-    if (typeof req.query.email === "string") {
-      const user = await userService.searchByEmail(req.query.email);
-      if (user !== undefined) {
-        let userActivateToken;
-        await getManager().transaction(async (transactionalEntityManager) => {
-          await tokensService.deleteActivationTokensOfUser(user, transactionalEntityManager);
-          userActivateToken = RandomString.generateRandomString(configs.activationToken.length);
-          const userData = {
-            token: userActivateToken,
-            user,
-            type: TokenType.userActivation,
-          } as TokenDto;
-          await tokensService.create(userData, transactionalEntityManager);
-        });
+    const user = await userService.searchByEmail(req.body.email);
 
-        await mailService.sendActivationEmail(userActivateToken, user.email);
-      }
+    if (user !== undefined && user.status === UserStatus.new) {
+      let userActivateToken;
+      await getManager().transaction(async (transactionalEntityManager) => {
+        await tokensService.deleteActivationTokensOfUser(user, transactionalEntityManager);
+        userActivateToken = RandomString.generateRandomString(configs.activationToken.length);
+        const userData = {
+          token: userActivateToken,
+          user,
+          type: TokenType.userActivation,
+        } as TokenDto;
+        await tokensService.create(userData, transactionalEntityManager);
+      });
+
+      await mailService.sendActivationEmail(userActivateToken, user.email);
     }
 
     res.status(200).json({

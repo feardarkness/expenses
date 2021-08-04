@@ -15,6 +15,7 @@ const debugInstance: debug.IDebugger = debug("app:expense-service");
 class ExpenseService extends CommonServicesConfig implements CRUD {
   private static instance: ExpenseService;
 
+  /* istanbul ignore next */
   static getInstance(): ExpenseService {
     if (!ExpenseService.instance) {
       ExpenseService.instance = new ExpenseService();

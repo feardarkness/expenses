@@ -5,6 +5,7 @@ import { TokenBlacklist } from "./tokens-blacklist.entity";
 class TokenBlacklistService extends CommonServicesConfig {
   private static instance: TokenBlacklistService;
 
+  /* istanbul ignore next */
   static getInstance(): TokenBlacklistService {
     if (!TokenBlacklistService.instance) {
       TokenBlacklistService.instance = new TokenBlacklistService();

@@ -3,7 +3,7 @@ import { getManager } from "typeorm";
 import { TokenBlacklist } from "../tokens/tokens-blacklist.entity";
 import DateCommon from "../../common/date-common";
 
-class LogoutService extends CommonServicesConfig {
+export class LogoutService extends CommonServicesConfig {
   private static instance: LogoutService;
 
   static getInstance(): LogoutService {

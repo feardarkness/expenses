@@ -6,7 +6,7 @@ import Mail from "../../common/mail";
 
 const debugInstance: debug.IDebugger = debug("app:mail-service");
 
-class MailService extends CommonServicesConfig {
+export class MailService extends CommonServicesConfig {
   private static instance: MailService;
   private apiKey: string = configs.mail.apiKey;
 

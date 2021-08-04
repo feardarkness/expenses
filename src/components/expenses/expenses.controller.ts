@@ -9,6 +9,7 @@ const debugInstance: debug.IDebugger = debug("app:expense-controller");
 export class ExpenseController {
   private static instance: ExpenseController;
 
+  /* istanbul ignore next */
   static getInstance(): ExpenseController {
     if (!ExpenseController.instance) {
       ExpenseController.instance = new ExpenseController();

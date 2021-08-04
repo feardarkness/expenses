@@ -6,6 +6,7 @@ import ForbiddenError from "../../common/errors/forbidden-error";
 class UsersMiddleware {
   private static instance: UsersMiddleware;
 
+  /* istanbul ignore next */
   static getInstance() {
     if (!UsersMiddleware.instance) {
       UsersMiddleware.instance = new UsersMiddleware();
@@ -14,7 +15,7 @@ class UsersMiddleware {
   }
 
   async validateEmailAlreadyExists(req: express.Request, res: express.Response, next: express.NextFunction) {
-    const user = await userService.searchByEmail(req.body.email.toLowerCase());
+    const user = await userService.searchByEmail(req.body.email);
 
     if (user !== undefined) {
       throw new ValidationError(`User with email ${req.body.email} already registered`);

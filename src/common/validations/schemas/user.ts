@@ -21,6 +21,7 @@ const createUserSchema: JSONSchemaType<UserDto> = {
       nullable: false,
       minLength: 3,
       maxLength: 254,
+      transform: ["trim", "toLowerCase"],
     },
     password: {
       type: "string",
@@ -82,6 +83,7 @@ const activationTokenForUserSchema: JSONSchemaType<GenerateActivationTokenQuery>
       type: "string",
       format: "email",
       nullable: false,
+      transform: ["trim", "toLowerCase"],
     },
   },
   required: ["email"],

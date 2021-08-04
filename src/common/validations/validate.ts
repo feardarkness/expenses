@@ -3,6 +3,7 @@ import Schemas from "./schemas/index";
 import ValidationError from "../errors/validation-error";
 import addFormats from "ajv-formats";
 import log from "../logger";
+import ajvKeywords from "ajv-keywords";
 
 class Validate {
   private static instance: Validate;
@@ -11,12 +12,14 @@ class Validate {
   constructor() {
     this.validator = new Ajv();
     addFormats(this.validator);
+    ajvKeywords(this.validator);
   }
 
   getValidator() {
     return this.validator;
   }
 
+  /* istanbul ignore next */
   static getInstance() {
     if (!Validate.instance) {
       Validate.instance = new Validate();

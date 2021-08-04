@@ -11,12 +11,14 @@ import NotFoundError from "../../common/errors/not-found-error";
 import debug from "debug";
 import tokensService from "../tokens/tokens.service";
 import DateCommon from "../../common/date-common";
+import ValidationError from "../../common/errors/validation-error";
 
 const debugInstance: debug.IDebugger = debug("app:user-service");
 
 class UserService extends CommonServicesConfig implements CRUD {
   private static instance: UserService;
 
+  /* istanbul ignore next */
   static getInstance(): UserService {
     if (!UserService.instance) {
       UserService.instance = new UserService();
@@ -50,6 +52,7 @@ class UserService extends CommonServicesConfig implements CRUD {
     return userRepository.findOne(userId);
   }
 
+  /* istanbul ignore next */
   async updateUser(user: User, dataToUpdate: UserDto) {
     const userRepository = getManager().getRepository(User);
     Object.assign(user, dataToUpdate);
@@ -77,7 +80,7 @@ class UserService extends CommonServicesConfig implements CRUD {
     const token = await tokensService.findActivationToken(activationToken);
 
     if (token === undefined) {
-      throw new NotFoundError("Token not found or expired");
+      throw new ValidationError("Token not found or expired");
     }
 
     return userRepository.update(token.userId, {

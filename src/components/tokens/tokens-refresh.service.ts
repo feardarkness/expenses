@@ -7,6 +7,7 @@ import configs from "../../configs";
 class TokenRefreshService extends CommonServicesConfig {
   private static instance: TokenRefreshService;
 
+  /* istanbul ignore next */
   static getInstance(): TokenRefreshService {
     if (!TokenRefreshService.instance) {
       TokenRefreshService.instance = new TokenRefreshService();
@@ -14,6 +15,7 @@ class TokenRefreshService extends CommonServicesConfig {
     return TokenRefreshService.instance;
   }
 
+  /* istanbul ignore next */
   find(token: string) {
     const tokenRefreshRepository = getManager().getRepository(TokenRefresh);
 
@@ -37,6 +39,7 @@ class TokenRefreshService extends CommonServicesConfig {
     return refreshTokenCreated;
   }
 
+  /* istanbul ignore next */
   async remove(refreshToken: TokenRefresh) {
     const refreshTokenRepository = getManager().getRepository(TokenRefresh);
     return refreshTokenRepository.remove(refreshToken);

@@ -7,6 +7,7 @@ import thingsService from "../things/things.service";
 class ExpensesMiddleware {
   private static instance: ExpensesMiddleware;
 
+  /* istanbul ignore next */
   static getInstance() {
     if (!ExpensesMiddleware.instance) {
       ExpensesMiddleware.instance = new ExpensesMiddleware();

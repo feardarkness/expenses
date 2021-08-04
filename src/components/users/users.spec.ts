@@ -11,6 +11,9 @@ import { UserStatus } from "../../common/enums/UserStatus";
 import loginService from "../auth/login.service";
 import usersService from "./users.service";
 import { UserType } from "../../common/enums/UserType";
+import { Token } from "../tokens/tokens.entity";
+import { TokenType } from "../../common/enums/TokenType";
+import DateCommon from "../../common/date-common";
 
 let expect = chai.expect;
 chai.use(sinonChai);
@@ -28,10 +31,16 @@ let newUserActiveJWT: string;
 let userToDelete: User;
 let userToDeleteJWT: string;
 
+let nonActivatedUser: User;
+
+let userToBeActivated: User;
+let userToBeActivatedActivationToken: Token;
+
 describe("User routes", () => {
   before(async () => {
     connection = await createConnection();
     const repository = connection.getRepository(User);
+    const tokenRepository = connection.getRepository(Token);
 
     activeUser = new User();
     activeUser.email = activeUserEmail;
@@ -56,6 +65,29 @@ describe("User routes", () => {
     await repository.save(userToDelete);
     let { token: token2 } = await loginService.generateToken(userToDelete);
     userToDeleteJWT = token2;
+
+    nonActivatedUser = new User();
+    nonActivatedUser.email = "nonactivateduser@email.com";
+    nonActivatedUser.password = "123";
+    nonActivatedUser.status = UserStatus.new;
+    nonActivatedUser.type = UserType.user;
+    await repository.save(nonActivatedUser);
+
+    userToBeActivated = new User();
+    userToBeActivated.email = "usertobeactivated@email.com";
+    userToBeActivated.password = "123";
+    userToBeActivated.status = UserStatus.new;
+    userToBeActivated.type = UserType.user;
+    await repository.save(userToBeActivated);
+
+    userToBeActivatedActivationToken = new Token();
+    userToBeActivatedActivationToken.token = "aaddff";
+    userToBeActivatedActivationToken.expiresAt = DateCommon.addTime(DateCommon.getCurrentDate(), {
+      hours: 5,
+    });
+    userToBeActivatedActivationToken.type = TokenType.userActivation;
+    userToBeActivatedActivationToken.user = userToBeActivated;
+    await tokenRepository.save(userToBeActivatedActivationToken);
   });
 
   after(async () => {
@@ -341,20 +373,59 @@ describe("User routes", () => {
     });
   });
 
-  describe("[POST /users/activation]", () => {
-    it("should not work with an activated user", async () => {
-      const email = "duplicated@email.com";
+  describe("[PUT /users/status]", () => {
+    it("should activate a user", async () => {
+      const { status } = await request(app).put("/users/status").query({
+        token: userToBeActivatedActivationToken.token,
+      });
 
-      const { body, status } = await request(app).get("/users/activation").query({
+      expect(status).to.equal(200);
+
+      const user = await usersService.findById(userToBeActivated.id);
+      expect(user?.status).to.equal(UserStatus.active);
+    });
+
+    it("should fail with an invalid token", async () => {
+      const { status } = await request(app).put("/users/status").query({
+        token: "not-a-real-token",
+      });
+
+      expect(status).to.equal(400);
+    });
+  });
+
+  describe("[POST /users/activation]", () => {
+    it("should not send an email with an activated user", async () => {
+      sinonSandbox.stub(Mail, "sendEmailWithTextBody").resolves();
+      const email = activeUserEmail;
+
+      const { body, status } = await request(app).post("/users/activation").send({
         email,
       });
 
       expect(Mail.sendEmailWithTextBody).to.not.been.called;
-      expect(status).to.equal(400, "Status 400 should be returned for validation errors");
+
+      expect(status).to.equal(200);
 
       expect(body).to.deep.equal({
-        error: "Invalid data",
-        detail: ["should have required property 'password'"],
+        message: "An email to activate your account will be sent shortly if your email account is registered.",
+      });
+    });
+
+    it("should send an email with a new user", async () => {
+      sinonSandbox.stub(Mail, "sendEmailWithTextBody").resolves();
+      const email = nonActivatedUser.email;
+
+      const { body, status } = await request(app).post("/users/activation").send({
+        email,
+      });
+
+      expect(Mail.sendEmailWithTextBody).to.been.calledOnce;
+
+      expect(status).to.equal(200);
+
+      expect(body).to.deep.equal({
+        message: "An email to activate your account will be sent shortly if your email account is registered.",
       });
     });
   });

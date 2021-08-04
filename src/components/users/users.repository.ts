@@ -4,18 +4,6 @@ import { User } from "./users.entity";
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
-  /**
-   * Find a user by full name
-   * @param firstName User's first name
-   * @param lastName User's last name
-   */
-  findByFullName(firstName: string, lastName: string): Promise<User[]> {
-    return this.createQueryBuilder("user")
-      .where("user.firstName = :firstName", { firstName })
-      .andWhere("user.lastName = :lastName", { lastName })
-      .getMany();
-  }
-
   findByEmail(email: string): Promise<User | undefined> {
     return this.createQueryBuilder("user").where("user.email=:email", { email }).getOne();
   }

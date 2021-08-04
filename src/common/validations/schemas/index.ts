@@ -1,17 +1,11 @@
-import { createUserSchema, activateUserSchema, updateUserSchema } from "./user";
-import { loginSchema, refreshSchema } from "./login";
-import { thingSchema, thingListSchema } from "./thing";
-import { expenseListSchema, expenseSchema, expenseUpdateSchema } from "./expense";
+import * as userSchemas from "./user";
+import * as loginSchemas from "./login";
+import * as thingSchemas from "./thing";
+import * as expenseSchemas from "./expense";
 
 export default {
-  createUserSchema,
-  activateUserSchema,
-  updateUserSchema,
-  loginSchema,
-  thingSchema,
-  thingListSchema,
-  expenseSchema,
-  expenseUpdateSchema,
-  expenseListSchema,
-  refreshSchema,
+  ...userSchemas,
+  ...loginSchemas,
+  ...thingSchemas,
+  ...expenseSchemas,
 };

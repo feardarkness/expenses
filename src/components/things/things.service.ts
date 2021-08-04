@@ -13,6 +13,7 @@ const debugInstance: debug.IDebugger = debug("app:thing-service");
 class ThingService extends CommonServicesConfig implements CRUD {
   private static instance: ThingService;
 
+  /* istanbul ignore next */
   static getInstance(): ThingService {
     if (!ThingService.instance) {
       ThingService.instance = new ThingService();

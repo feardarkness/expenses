@@ -5,6 +5,7 @@ class CommonValidators {
 
   constructor() {}
 
+  /* istanbul ignore next */
   static getInstance() {
     if (!CommonValidators.instance) {
       CommonValidators.instance = new CommonValidators();

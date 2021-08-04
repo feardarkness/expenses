@@ -6,6 +6,7 @@ import validate from "../validations/validate";
 class ValidateMiddleware {
   private static instance: ValidateMiddleware;
 
+  /* istanbul ignore next */
   static getInstance() {
     if (!ValidateMiddleware.instance) {
       ValidateMiddleware.instance = new ValidateMiddleware();

@@ -8,11 +8,11 @@ import { UserType } from "../enums/UserType";
 import ForbiddenError from "../errors/forbidden-error";
 import tokensBlacklistService from "../../components/tokens/tokens-blacklist.service";
 import tokensRefreshService from "../../components/tokens/tokens-refresh.service";
-import { nextDay } from "date-fns";
 
 class AuthMiddleware {
   private static instance: AuthMiddleware;
 
+  /* istanbul ignore next */
   static getInstance() {
     if (!AuthMiddleware.instance) {
       AuthMiddleware.instance = new AuthMiddleware();
@@ -28,6 +28,7 @@ class AuthMiddleware {
   validateToken(ignoreExpiration = false) {
     return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
       const authorizationToken = req.get("authorization");
+
       let decodedToken;
       try {
         if (authorizationToken === undefined) {

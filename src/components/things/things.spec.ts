@@ -9,7 +9,6 @@ import chaiJsonSchema from "chai-json-schema-ajv";
 import { User } from "../users/users.entity";
 import { UserStatus } from "../../common/enums/UserStatus";
 import loginService from "../auth/login.service";
-import addFormats from "ajv-formats";
 import Validate from "../../common/validations/validate";
 
 import { UserType } from "../../common/enums/UserType";

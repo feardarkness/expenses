@@ -27,9 +27,9 @@ export class UserRoutes extends CommonRoutesConfig {
       asyncWrapper(userController.updateStatus)
     );
 
-    this.router.get(
+    this.router.post(
       "/activation",
-      asyncWrapper(validateMiddleware.validateData("activationTokenForUserSchema", "query")),
+      asyncWrapper(validateMiddleware.validateData("activationTokenForUserSchema", "body")),
       asyncWrapper(userController.sendActivationEmail)
     );
 

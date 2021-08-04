@@ -11,6 +11,7 @@ import { User } from "../users/users.entity";
 class TokenService extends CommonServicesConfig implements CRUD {
   private static instance: TokenService;
 
+  /* istanbul ignore next */
   static getInstance(): TokenService {
     if (!TokenService.instance) {
       TokenService.instance = new TokenService();

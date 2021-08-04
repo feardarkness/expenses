@@ -12,7 +12,6 @@ import loginService from "../auth/login.service";
 import { UserType } from "../../common/enums/UserType";
 import { Thing } from "../things/things.entity";
 import { Expense } from "./expenses.entity";
-import DateCommon from "../../common/date-common";
 
 let expect = chai.expect;
 chai.use(sinonChai);

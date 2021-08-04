@@ -1,12 +1,9 @@
 import * as express from "express";
 import loginService from "./login.service";
-import ValidationError from "../../common/errors/validation-error";
-import Validate from "../../common/validations/validate";
 import Bcrypt from "../../common/bcrypt";
 import UnauthorizedError from "../../common/errors/unauthorized-error";
-import configs from "../../configs";
 
-class LoginMiddleware {
+export class LoginMiddleware {
   private static instance: LoginMiddleware;
 
   static getInstance() {
@@ -17,17 +14,6 @@ class LoginMiddleware {
   }
 
   /**
-   * Check if the login body is valid
-   * @param req Express request
-   * @param res Express response
-   * @param next Function to call the next middleware
-   */
-  async validateLoginData(req: express.Request, res: express.Response, next: express.NextFunction) {
-    Validate.schema("login", req.body);
-    next();
-  }
-
-  /**
    * Check if the credentials provided are valid
    * @param req Express request
    * @param res Express response
@@ -35,6 +21,7 @@ class LoginMiddleware {
    */
   async credentialsAreValid(req: express.Request, res: express.Response, next: express.NextFunction) {
     const user = await loginService.searchActiveByEmail(req.body.email);
+
     if (user === undefined) {
       throw new UnauthorizedError("Unauthorized");
     }

@@ -4,7 +4,7 @@ import configs from "../../configs/index";
 import { CommonServicesConfig } from "../../common/common.services.config";
 import RandomString from "../../common/random-string";
 
-class LoginService extends CommonServicesConfig {
+export class LoginService extends CommonServicesConfig {
   private static instance: LoginService;
 
   static getInstance(): LoginService {

@@ -6,10 +6,13 @@
     "src/**/*.ts"
   ],
   "exclude": [
-    "**/*.spec.js",
+    "src/**/*.spec.ts",
+    "src/**/*.dto.ts",
+    "src/**/*.entity.ts",
+    "src/configs",
     "src/common/interfaces"
   ],
-  "branches": 90,
+  "branches": 80,
   "lines": 90,
   "functions": 90,
   "statements": 90

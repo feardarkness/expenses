@@ -9,6 +9,7 @@ const debugInstance: debug.IDebugger = debug("app:thing-controller");
 export class ThingController {
   private static instance: ThingController;
 
+  /* istanbul ignore next */
   static getInstance(): ThingController {
     if (!ThingController.instance) {
       ThingController.instance = new ThingController();
