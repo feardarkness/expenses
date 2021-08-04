@@ -14,6 +14,12 @@ Postgresql
 
 2. Create a new database with the name configured on the .env file.
 
+3. Create the extension to generate UUID.
+
+```psql
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+```
+
 ## Create migrations
 
 ```bash
