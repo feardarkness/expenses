@@ -4,5 +4,5 @@ node_js:
 services:
   - postgresql
 before_script:
-  - psql -c 'create database expenses-test;' -U postgres
+  - psql -c 'create database "expenses-test";' -U postgres
   - npm rebuild
