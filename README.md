@@ -2,6 +2,8 @@
 
 REST API with JWT auth.
 
+[![Build Status](https://www.travis-ci.com/feardarkness/expenses.svg?branch=main)](https://www.travis-ci.com/feardarkness/expenses)
+
 ## Requirements
 
 Node 14 or higher.
