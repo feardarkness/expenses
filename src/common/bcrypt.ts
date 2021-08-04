@@ -1,4 +1,4 @@
-import * as bcrypt from "Bcrypt";
+import * as bcrypt from "bcrypt";
 
 export default class Bcrypt {
   /**
