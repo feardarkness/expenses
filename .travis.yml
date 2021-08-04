@@ -6,4 +6,4 @@ services:
 before_script:
   - psql -c 'create database "expenses-test";' -U postgres
   - psql -c "CREATE USER pguser WITH PASSWORD 'pgpass';" -U postgres
-  - psql -c 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";' -U postgres
+  - psql -d "expenses-test" -c 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";' -U postgres
