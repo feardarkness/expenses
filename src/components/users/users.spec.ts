@@ -239,7 +239,7 @@ describe("User routes", () => {
       const firstCallArg1 = firstCall.args[0];
       const firstCallArg2 = firstCall.args[1];
 
-      expect(firstCallArg1.to).to.equal(createUserEmail);
+      expect(firstCallArg1.to).to.equal(createUserEmail.toLowerCase());
       expect(firstCallArg2).to.equal("sampleKey");
 
       expect(status).to.equal(201, "Status 201 should be returned for created users");

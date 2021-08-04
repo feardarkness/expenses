@@ -22,6 +22,15 @@ class MailService extends CommonServicesConfig {
 
     return Mail.sendEmailWithTextBody(email, this.apiKey);
   }
+
+  sendActivationEmail(token: string, email: string) {
+    this.sendEmail({
+      from: configs.mail.from,
+      subject: "Account verification [Expenses App]",
+      text: `Follow the link to activate your account: ${configs.app.DOMAIN}/users/status?token=${token}. The token will be valid for ${configs.activationToken.expirationInHours} hours`,
+      to: email,
+    });
+  }
 }
 
 export default MailService.getInstance();

@@ -10,6 +10,7 @@ import RandomString from "../../common/random-string";
 import { TokenDto } from "../tokens/tokens.dto";
 import { getManager } from "typeorm";
 import { TokenType } from "../../common/enums/TokenType";
+import { config } from "process";
 
 const debugInstance: debug.IDebugger = debug("app:user-controller");
 
@@ -39,13 +40,8 @@ export class UserController {
       } as TokenDto;
       await tokensService.create(userData, transactionalEntityManager);
     });
-    // we don't care if it fails, just ask another activation link
-    await mailService.sendEmail({
-      from: configs.mail.from,
-      subject: "Account verification [Expenses App]",
-      text: `Follow the link to activate your account: http://example.com/verificar?token=${userActivateToken}`,
-      to: userCreated.email,
-    });
+
+    await mailService.sendActivationEmail(userActivateToken, userCreated.email);
 
     res.status(201).json({
       message: "An email was sent with a link to activate your user. The link is valid for six hours",
@@ -72,9 +68,6 @@ export class UserController {
   async updateStatus(req: express.Request, res: express.Response) {
     log.trace(`[updateStatus]`, { userId: req.params.userId });
     await userService.activateUser(req.query.token as string);
-
-    // TODO send an email telling them that the user is activated
-
     res.status(200).json({
       message: "User activated successfully",
     });
@@ -87,6 +80,33 @@ export class UserController {
 
     res.status(204).json({
       message: "User deleted successfully",
+    });
+  }
+
+  async sendActivationEmail(req: express.Request, res: express.Response) {
+    log.trace(`[sendActivationEmail]`, { email: req.query.email });
+
+    if (typeof req.query.email === "string") {
+      const user = await userService.searchByEmail(req.query.email);
+      if (user !== undefined) {
+        let userActivateToken;
+        await getManager().transaction(async (transactionalEntityManager) => {
+          await tokensService.deleteActivationTokensOfUser(user, transactionalEntityManager);
+          userActivateToken = RandomString.generateRandomString(configs.activationToken.length);
+          const userData = {
+            token: userActivateToken,
+            user,
+            type: TokenType.userActivation,
+          } as TokenDto;
+          await tokensService.create(userData, transactionalEntityManager);
+        });
+
+        await mailService.sendActivationEmail(userActivateToken, user.email);
+      }
+    }
+
+    res.status(200).json({
+      message: `An email to activate your account will be sent shortly if your email account is registered.`,
     });
   }
 }

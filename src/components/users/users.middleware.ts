@@ -1,7 +1,6 @@
 import * as express from "express";
 import userService from "./users.service";
 import ValidationError from "../../common/errors/validation-error";
-import UnauthorizedError from "../../common/errors/unauthorized-error";
 import ForbiddenError from "../../common/errors/forbidden-error";
 
 class UsersMiddleware {
@@ -15,7 +14,7 @@ class UsersMiddleware {
   }
 
   async validateEmailAlreadyExists(req: express.Request, res: express.Response, next: express.NextFunction) {
-    const user = await userService.searchByEmail(req.body.email);
+    const user = await userService.searchByEmail(req.body.email.toLowerCase());
 
     if (user !== undefined) {
       throw new ValidationError(`User with email ${req.body.email} already registered`);

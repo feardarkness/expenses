@@ -6,6 +6,7 @@ import { Token } from "./tokens.entity";
 import configs from "../../configs";
 import DateCommon from "../../common/date-common";
 import { TokenType } from "../../common/enums/TokenType";
+import { User } from "../users/users.entity";
 
 class TokenService extends CommonServicesConfig implements CRUD {
   private static instance: TokenService;
@@ -37,6 +38,14 @@ class TokenService extends CommonServicesConfig implements CRUD {
         type: TokenType.userActivation,
         expiresAt: MoreThan(DateCommon.getCurrentDate()),
       },
+    });
+  }
+
+  async deleteActivationTokensOfUser(user: User, manager?: EntityManager) {
+    const tokenRepository = manager ? manager.getRepository(Token) : getManager().getRepository(Token);
+    return tokenRepository.delete({
+      user,
+      type: TokenType.userActivation,
     });
   }
 

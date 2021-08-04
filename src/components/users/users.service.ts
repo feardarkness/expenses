@@ -9,7 +9,6 @@ import { UserType } from "../../common/enums/UserType";
 import { UserStatus } from "../../common/enums/UserStatus";
 import NotFoundError from "../../common/errors/not-found-error";
 import debug from "debug";
-import { Token } from "../tokens/tokens.entity";
 import tokensService from "../tokens/tokens.service";
 import DateCommon from "../../common/date-common";
 
@@ -36,6 +35,7 @@ class UserService extends CommonServicesConfig implements CRUD {
 
     const user = new User();
     Object.assign(user, resource);
+    user.email = resource.email.toLowerCase();
     user.type = UserType.user;
     user.status = UserStatus.new;
     user.password = await bcrypt.hash(resource.password, configs.jwt.saltRounds);

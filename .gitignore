@@ -6,3 +6,4 @@ tmp/
 logs/
 temp/
 .env
+.nyc_output/

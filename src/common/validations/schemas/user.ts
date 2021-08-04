@@ -17,10 +17,15 @@ const createUserSchema: JSONSchemaType<UserDto> = {
     },
     email: {
       type: "string",
+      format: "email",
+      nullable: false,
+      minLength: 3,
+      maxLength: 254,
     },
     password: {
       type: "string",
       nullable: false,
+      minLength: 5,
     },
   },
   required: ["email", "password"],
@@ -66,4 +71,21 @@ const updateUserSchema: JSONSchemaType<UpdateUser> = {
   additionalProperties: false,
 };
 
-export { createUserSchema, activateUserSchema, updateUserSchema };
+interface GenerateActivationTokenQuery {
+  email: string;
+}
+
+const activationTokenForUserSchema: JSONSchemaType<GenerateActivationTokenQuery> = {
+  type: "object",
+  properties: {
+    email: {
+      type: "string",
+      format: "email",
+      nullable: false,
+    },
+  },
+  required: ["email"],
+  additionalProperties: false,
+};
+
+export { createUserSchema, activateUserSchema, updateUserSchema, activationTokenForUserSchema };
