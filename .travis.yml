@@ -1,3 +1,8 @@
 language: node_js
 node_js:
   - 14
+services:
+  - postgresql
+before_script:
+  - psql -c 'create database expenses-test;' -U postgres
+  - npm rebuild
