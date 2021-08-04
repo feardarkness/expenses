@@ -15,7 +15,7 @@ export class LoginRoutes extends CommonRoutesConfig {
     this.router.post(
       "",
       asyncWrapper(validateMiddleware.validateData("loginSchema", "body")),
-      asyncWrapper(loginMiddleware.credentialsAreValid),
+      asyncWrapper(loginMiddleware.credentialsAreValidAndUserIsActive),
       asyncWrapper(authMiddleware.deleteAllRefreshTokensOfUser),
       asyncWrapper(loginController.generateTokens)
     );

@@ -15,6 +15,7 @@ import DateCommon from "../../common/date-common";
 import loginController, { LoginController } from "./login.controller";
 import loginMiddleware, { LoginMiddleware } from "./login.middleware";
 import loginService, { LoginService } from "./login.service";
+import Mail from "../../common/mail";
 
 let expect = chai.expect;
 chai.use(sinonChai);
@@ -93,13 +94,20 @@ describe("Login Routes", () => {
   });
 
   describe("[POST /login] login route", () => {
-    it("should not login with a new user (not yet active)", async () => {
+    it("should send an activation email to a new User (not yet active)", async () => {
+      sinonSandbox.stub(Mail, "sendEmailWithTextBody").resolves();
       const { body, status } = await request(app).post(`/login`).send({
         email: newUser.email,
         password: newUserClearPass,
       });
 
-      expect(status).to.equal(401);
+      expect(status).to.equal(400);
+
+      expect(Mail.sendEmailWithTextBody).to.be.calledOnce;
+      expect(body).to.deep.equal({
+        error: "Looks like your account is not yet verified. Please check your email.",
+        detail: [],
+      });
     });
 
     it("should not login with an inactive user", async () => {

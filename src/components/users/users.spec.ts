@@ -254,6 +254,27 @@ describe("User routes", () => {
   });
 
   describe("[POST /users] Create user", () => {
+    it("should send an activation email to a user not yet active", async () => {
+      sinonSandbox.stub(Mail, "sendEmailWithTextBody").resolves();
+
+      const createUserEmail = nonActivatedUser.email;
+      const { body, status } = await request(app).post("/users").send({
+        fullName: "John Snow",
+        age: 30,
+        email: createUserEmail,
+        password: "somePassword",
+      });
+
+      expect(Mail.sendEmailWithTextBody).to.be.calledOnce;
+
+      expect(status).to.equal(400, "Status 400 should be returned for users already created");
+
+      expect(body).to.deep.equal({
+        error: "Looks like your account is not yet verified. Please check your email.",
+        detail: [],
+      });
+    });
+
     it("should create a user and send an activation email", async () => {
       sinonSandbox.stub(Mail, "sendEmailWithTextBody").resolves();
 

@@ -2,6 +2,8 @@ import * as express from "express";
 import userService from "./users.service";
 import ValidationError from "../../common/errors/validation-error";
 import ForbiddenError from "../../common/errors/forbidden-error";
+import { UserStatus } from "../../common/enums/UserStatus";
+import usersService from "./users.service";
 
 class UsersMiddleware {
   private static instance: UsersMiddleware;
@@ -14,10 +16,24 @@ class UsersMiddleware {
     return UsersMiddleware.instance;
   }
 
-  async validateEmailAlreadyExists(req: express.Request, res: express.Response, next: express.NextFunction) {
+  /**
+   * Checks if the email is already registered. If the email is registered but the user is not activated yet, send an email to his/her account
+   * @param req
+   * @param res
+   * @param next
+   */
+  async validateEmailAlreadyExistsOrNotYetActivated(
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) {
     const user = await userService.searchByEmail(req.body.email);
 
     if (user !== undefined) {
+      if (user?.status === UserStatus.new) {
+        await usersService.sendActivationEmail(user);
+        throw new ValidationError("Looks like your account is not yet verified. Please check your email.");
+      }
       throw new ValidationError(`User with email ${req.body.email} already registered`);
     }
     next();

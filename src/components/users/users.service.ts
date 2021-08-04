@@ -7,11 +7,14 @@ import bcrypt from "../../common/bcrypt";
 import configs from "../../configs";
 import { UserType } from "../../common/enums/UserType";
 import { UserStatus } from "../../common/enums/UserStatus";
-import NotFoundError from "../../common/errors/not-found-error";
 import debug from "debug";
 import tokensService from "../tokens/tokens.service";
 import DateCommon from "../../common/date-common";
 import ValidationError from "../../common/errors/validation-error";
+import RandomString from "../../common/random-string";
+import { TokenType } from "../../common/enums/TokenType";
+import { TokenDto } from "../tokens/tokens.dto";
+import mailsService from "../mails/mails.service";
 
 const debugInstance: debug.IDebugger = debug("app:user-service");
 
@@ -87,6 +90,22 @@ class UserService extends CommonServicesConfig implements CRUD {
       status: UserStatus.active,
       updatedAt: DateCommon.getCurrentDate(),
     });
+  }
+
+  async sendActivationEmail(user: User) {
+    let userActivateToken;
+    await getManager().transaction(async (transactionalEntityManager) => {
+      await tokensService.deleteActivationTokensOfUser(user, transactionalEntityManager);
+      userActivateToken = RandomString.generateRandomString(configs.activationToken.length);
+      const userData = {
+        token: userActivateToken,
+        user,
+        type: TokenType.userActivation,
+      } as TokenDto;
+      await tokensService.create(userData, transactionalEntityManager);
+    });
+
+    await mailsService.sendActivationEmail(userActivateToken, user.email);
   }
 }
 

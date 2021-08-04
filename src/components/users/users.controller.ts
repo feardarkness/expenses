@@ -90,19 +90,7 @@ export class UserController {
     const user = await userService.searchByEmail(req.body.email);
 
     if (user !== undefined && user.status === UserStatus.new) {
-      let userActivateToken;
-      await getManager().transaction(async (transactionalEntityManager) => {
-        await tokensService.deleteActivationTokensOfUser(user, transactionalEntityManager);
-        userActivateToken = RandomString.generateRandomString(configs.activationToken.length);
-        const userData = {
-          token: userActivateToken,
-          user,
-          type: TokenType.userActivation,
-        } as TokenDto;
-        await tokensService.create(userData, transactionalEntityManager);
-      });
-
-      await mailService.sendActivationEmail(userActivateToken, user.email);
+      await userService.sendActivationEmail(user);
     }
 
     res.status(200).json({

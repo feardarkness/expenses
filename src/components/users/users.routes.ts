@@ -16,7 +16,7 @@ export class UserRoutes extends CommonRoutesConfig {
     this.router.post(
       "",
       asyncWrapper(validateMiddleware.validateData("createUserSchema", "body")),
-      asyncWrapper(userMiddleware.validateEmailAlreadyExists),
+      asyncWrapper(userMiddleware.validateEmailAlreadyExistsOrNotYetActivated),
       asyncWrapper(userMiddleware.validatePasswordComplexity),
       asyncWrapper(userController.createUser)
     );
