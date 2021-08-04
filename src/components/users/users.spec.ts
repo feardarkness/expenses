@@ -340,4 +340,22 @@ describe("User routes", () => {
       });
     });
   });
+
+  describe("[POST /users/activation]", () => {
+    it("should not work with an activated user", async () => {
+      const email = "duplicated@email.com";
+
+      const { body, status } = await request(app).get("/users/activation").query({
+        email,
+      });
+
+      expect(Mail.sendEmailWithTextBody).to.not.been.called;
+      expect(status).to.equal(400, "Status 400 should be returned for validation errors");
+
+      expect(body).to.deep.equal({
+        error: "Invalid data",
+        detail: ["should have required property 'password'"],
+      });
+    });
+  });
 });
