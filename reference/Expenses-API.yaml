@@ -20,50 +20,36 @@ paths:
           content:
             application/json:
               schema:
-                description: ''
-                type: object
-                properties:
-                  status:
-                    type: string
-                    minLength: 1
-                required:
-                  - status
-                x-examples:
-                  example-1:
-                    status: The application is running
-              examples: {}
+                $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                Success:
+                  value:
+                    message: The application is running
       operationId: get
       description: Endpoint to check if the API is up.
   /users:
     post:
-      summary: Create a new user
-      tags:
-        - user
+      summary: Create a User
       responses:
         '201':
           description: Created
           content:
             application/json:
               schema:
-                description: ''
-                type: object
-                x-examples:
-                  example-1:
-                    message: An email was sent with a link to activate your user. The link is valid for six hours
-                properties:
-                  message:
-                    type: string
-                    minLength: 1
-                    example: An email was sent with a link to activate your user. The link is valid for six hours
-                required:
-                  - message
+                $ref: '#/components/schemas/User'
               examples:
                 Success:
                   value:
                     message: An email was sent with a link to activate your user. The link is valid for six hours
           headers: {}
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidData'
       operationId: post-users
-      description: Creates a new user in the application
+      description: 'Creates a new user in the application. If the user is already created but not active yet, it will send an activation email to the user.'
       requestBody:
         content:
           application/json:
@@ -99,6 +85,161 @@ paths:
               required:
                 - email
                 - password
+      tags:
+        - Users
+  '/users/:userId':
+    get:
+      summary: Get a User
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidData'
+      operationId: 'get-users-:userId'
+      description: Get the basic user information
+      security:
+        - Bearer Authorization: []
+    put:
+      summary: Update a User
+      operationId: 'put-users-:userId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                Success:
+                  value:
+                    message: User updated successfully
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidData'
+      description: Modify basic user data
+      security:
+        - Bearer Authorization: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              properties:
+                fullName:
+                  type: string
+                  minLength: 1
+                age:
+                  type: number
+              required:
+                - fullName
+                - age
+              x-examples:
+                example-1:
+                  fullName: John Seamus Doe
+                  age: 30
+            examples:
+              Success:
+                value:
+                  fullName: John Seamus Doe
+                  age: 30
+    delete:
+      summary: Delete a User
+      operationId: 'delete-users-:userId'
+      responses:
+        '200':
+          description: OK
+      description: ''
+  /users/status:
+    parameters: []
+    put:
+      summary: Activate a user
+      operationId: put-users-status
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                Success:
+                  value:
+                    message: User activated successfully
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: token
+          description: Activation token
+          required: true
+      tags:
+        - Users
+  /users/activation:
+    parameters: []
+    post:
+      summary: Activate User
+      operationId: post-users-activation
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  email:
+                    type: string
+                    minLength: 1
+                required:
+                  - email
+                x-examples:
+                  example-1:
+                    email: ariel_dna@outlook.com
+              examples:
+                Success:
+                  value:
+                    email: ariel_dna@outlook.com
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidData'
+      description: Send an activation email to a new user. Only activated users can use the application.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              x-examples:
+                example-1:
+                  email: ariel_dna@outlook.com
+              properties:
+                email:
+                  type: string
+                  minLength: 1
+                  format: email
+                  example: john@email.com
+              required:
+                - email
+            examples: {}
+        description: ''
 components:
   schemas:
     User:
@@ -136,8 +277,39 @@ components:
         - age
         - email
       title: Basic User
+    SuccessResponse:
+      title: SuccessResponse
+      type: object
+      properties:
+        message:
+          type: string
+    InvalidData:
+      description: ''
+      type: object
+      x-examples:
+        example-1:
+          error: Invalid data
+          detail:
+            - /email should NOT have fewer than 3 characters
+      properties:
+        error:
+          type: string
+          minLength: 1
+          example: Invalid Data
+        detail:
+          type: array
+          items:
+            type: string
+            example: /email should NOT have fewer than 3 characters
+      required:
+        - error
+        - detail
+      examples:
+        - error: Invalid Data
+          detail:
+            - /email should NOT have fewer than 3 characters
   securitySchemes:
-    some-key:
+    Bearer Authorization:
       name: Authorization
       type: apiKey
       in: header
