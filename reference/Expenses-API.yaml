@@ -2,18 +2,16 @@ openapi: 3.1.0
 info:
   title: Expenses API
   version: '1.0'
-  summary: REST API of the expenses App. It allows to create users and register expenses for them.
   license:
     name: MIT
     identifier: MIT
+  description: REST API of the expenses App. It allows to create users and register expenses for them.
 servers:
   - url: 'http://localhost:3000'
 paths:
   /:
     get:
       summary: Status
-      tags:
-        - status
       responses:
         '200':
           description: OK
@@ -27,6 +25,8 @@ paths:
                     message: The application is running
       operationId: get
       description: Endpoint to check if the API is up.
+      tags:
+        - Status
   /users:
     post:
       summary: Create a User
@@ -87,7 +87,7 @@ paths:
                 - password
       tags:
         - Users
-  '/users/:userId':
+  '/users/{userId}':
     get:
       summary: Get a User
       tags:
@@ -108,7 +108,7 @@ paths:
       operationId: 'get-users-:userId'
       description: Get the basic user information
       security:
-        - Bearer Authorization: []
+        - User Bearer Authorization: []
     put:
       summary: Update a User
       operationId: 'put-users-:userId'
@@ -131,7 +131,7 @@ paths:
                 $ref: '#/components/schemas/InvalidData'
       description: Modify basic user data
       security:
-        - Bearer Authorization: []
+        - User Bearer Authorization: []
       requestBody:
         content:
           application/json:
@@ -156,13 +156,24 @@ paths:
                 value:
                   fullName: John Seamus Doe
                   age: 30
+      tags:
+        - Users
     delete:
       summary: Delete a User
       operationId: 'delete-users-:userId'
       responses:
         '200':
           description: OK
-      description: ''
+      description: Delete a user from the application
+      tags:
+        - Users
+    parameters:
+      - schema:
+          type: string
+        name: userId
+        in: path
+        required: true
+        description: User identifier
   /users/status:
     parameters: []
     put:
@@ -188,6 +199,7 @@ paths:
           required: true
       tags:
         - Users
+      description: Activate a new user. A user only can login after the account is activated.
   /users/activation:
     parameters: []
     post:
@@ -240,6 +252,231 @@ paths:
                 - email
             examples: {}
         description: ''
+      tags:
+        - Users
+  /login:
+    post:
+      summary: Login
+      operationId: post-login
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+      tags:
+        - Login/Logout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              x-examples:
+                example-1:
+                  email: johnDoe
+                  password: anAmazingPassword
+              properties:
+                email:
+                  type: string
+                  format: email
+                  minLength: 3
+                  maxLength: 254
+                password:
+                  type: string
+                  minLength: 5
+                  maxLength: 60
+              required:
+                - email
+                - password
+            examples: {}
+      description: Login to the application. This endpoint will return the tokens required to consume all secured endpoints.
+  /login/refresh:
+    post:
+      summary: Refresh Tokens
+      operationId: post-login
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+      tags:
+        - Login/Logout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              x-examples:
+                example-1:
+                  email: johnDoe
+                  password: anAmazingPassword
+              properties:
+                refreshToken:
+                  type: string
+              required:
+                - refreshToken
+            examples: {}
+      description: 'Refresh the authorization tokens. Only one refresh token per time is valid, if you request a new one the older one will not be valid. This endpoint required a Bearer token, but the backend will not validate the expiration claim.'
+      security:
+        - User Bearer Authorization: []
+    parameters: []
+  /logout:
+    post:
+      summary: Logout
+      operationId: post-login
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+        '':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                Success:
+                  value:
+                    message: Logout completed
+      tags:
+        - Login/Logout
+      description: Logout from the application. The token and refresh token associated will not be valid after calling this route.
+      security:
+        - User Bearer Authorization: []
+    parameters: []
+  /things:
+    get:
+      summary: Get all things
+      tags:
+        - Things
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BasicPagination'
+                  - type: object
+                    properties:
+                      records:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Thing'
+                    required:
+                      - records
+              examples:
+                Success:
+                  value:
+                    limit: 100
+                    offset: 0
+                    order: 'field1,field2'
+                    records:
+                      - name: Food
+                        description: All expenses related to food will be saved here
+                        createdAt: '2019-08-24T14:15:22Z'
+                        updatedAt: '2019-08-24T14:15:22Z'
+                        id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                        userId: 2c4a230c-5085-4924-a3e1-25fb4fc5965b
+      operationId: get-things
+      security:
+        - User Bearer Authorization: []
+      description: |-
+        Get all things associated with the user. To return records in descending order use "-". Example: "-UpdatedAt". 
+
+        userId is required only with an ADMIN account.
+      parameters:
+        - schema:
+            type: number
+            example: '50'
+            maxLength: 4
+            minimum: 1
+            maximum: 100
+          in: query
+          name: limit
+          description: Limit the number of records returned
+        - schema:
+            type: number
+            minimum: 0
+            example: 120
+          in: query
+          name: offset
+          description: Number of records to be skipped
+        - schema:
+            type: string
+            default: '-updatedAt'
+            enum:
+              - updatedAt
+          in: query
+          name: order
+          description: The results will be ordered by this field
+        - schema:
+            type: string
+            example: e8a25b46-aa52-4909-871f-9cd1b5f2d931
+          in: query
+          name: userId
+          description: It will return records associated to this user. This field is used only with an ADMIN user.
+    post:
+      summary: Create a Thing
+      tags:
+        - Things
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Thing'
+              examples:
+                Success:
+                  value:
+                    name: Food
+                    description: All expenses related to food will be saved here
+                    createdAt: '2019-08-24T14:15:22Z'
+                    updatedAt: '2019-08-24T14:15:22Z'
+                    id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                    userId: 2c4a230c-5085-4924-a3e1-25fb4fc5965b
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidDataResponse'
+      operationId: post-things
+      security:
+        - User Bearer Authorization: []
+      description: Create a new thing. Things are needed to create expenses later. A thing can be associated with multiple expenses.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BasicThing'
+        description: ''
 components:
   schemas:
     User:
@@ -283,8 +520,9 @@ components:
       properties:
         message:
           type: string
-    InvalidData:
-      description: ''
+      description: A successful response
+    InvalidDataResponse:
+      description: A validation error from the API
       type: object
       x-examples:
         example-1:
@@ -308,10 +546,151 @@ components:
         - error: Invalid Data
           detail:
             - /email should NOT have fewer than 3 characters
+      title: ''
+    AuthToken:
+      description: Authorization token returned after a correct login/refresh
+      type: object
+      x-examples:
+        example-1:
+          token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhhZDUwMDgzLWM5MmUtNGUzOS1iODUxLTI2OWVmMDNjNGY4YiIsImlhdCI6MTYyODE5MDIzNiwiZXhwIjoxNjI4MTk3NDM2fQ.KCKd2VhdZbKY0tKihjjOs51qmfK5L2WiVk2ppuUayJQ
+          refreshToken: lTLx9EOxXYma96A6Dbj4p
+          user:
+            email: ariel_dna@outlook.com
+            id: 8ad50083-c92e-4e39-b851-269ef03c4f8b
+            age: 30
+            fullName: John Doee
+      properties:
+        token:
+          type: string
+          minLength: 1
+          format: uuid
+        refreshToken:
+          type: string
+          minLength: 1
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+        - token
+        - refreshToken
+        - user
+      examples:
+        - token: b5507016-7da2-4777-a161-1e8042a6a377
+          refreshToken: lTLx9EOxXYma96A6Dbj4p12dwdswqa
+          user:
+            id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+            fullName: John Doe
+            age: 25
+            email: john@email.com
+    UnauthorizedResponse:
+      description: Response to an unauthorized request
+      type: object
+      properties:
+        error:
+          type: string
+          minLength: 1
+      required:
+        - error
+      x-examples:
+        example-1:
+          error: Unauthorized
+      examples:
+        - error: Unauthorized
+    BasicThing:
+      description: Basic thing information.
+      type: object
+      x-examples:
+        example-1:
+          name: Food
+          description: This will group all food
+      examples:
+        - name: Food
+          description: All expenses related to food will be saved here
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+        description:
+          type: string
+          minLength: 3
+          maxLength: 500
+      required:
+        - name
+        - description
+      title: BasicThing
+    Thing:
+      allOf:
+        - $ref: '#/components/schemas/BasicThing'
+        - $ref: '#/components/schemas/CreatedUpdatedDates'
+        - properties:
+            id:
+              type: string
+              format: uuid
+            userId:
+              type: string
+              format: uuid
+          type: object
+          required:
+            - id
+            - userId
+      description: A thing
+    CreatedUpdatedDates:
+      description: ''
+      type: object
+      x-examples:
+        example-1:
+          createdAt: '2021-08-05T15:46:43-04:00'
+          updatedAt: '2021-08-05T15:46:43-04:00'
+      examples: []
+      properties:
+        createdAt:
+          type: string
+          minLength: 1
+          format: date-time
+        updatedAt:
+          type: string
+          minLength: 1
+          format: date-time
+      required:
+        - createdAt
+        - updatedAt
+    BasicPagination:
+      description: ''
+      type: object
+      x-examples:
+        example-1:
+          limit: 100
+          offset: 0
+          order: 'field1,field2'
+      examples:
+        - limit: 100
+          offset: 0
+          order: 'field1,field2'
+      properties:
+        limit:
+          type: integer
+          minimum: 1
+        offset:
+          type: integer
+          minimum: 0
+        total:
+          type: integer
+          minimum: 0
+      required:
+        - limit
+        - offset
+        - total
   securitySchemes:
-    Bearer Authorization:
+    User Bearer Authorization:
       name: Authorization
       type: apiKey
       in: header
+    Admin Bearer Authorization:
+      name: Authorization
+      type: apiKey
+      in: header
+      description: ''
+  responses: {}
 security:
   - test-api-key: []
+  - Admin Bearer Authorization: []
