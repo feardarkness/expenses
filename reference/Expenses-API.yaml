@@ -206,7 +206,7 @@ paths:
   /users/activation:
     parameters: []
     post:
-      summary: Activate User
+      summary: Send activation email to User
       operationId: post-users-activation
       responses:
         '200':
