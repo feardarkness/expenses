@@ -1,0 +1,145 @@
+openapi: 3.1.0
+info:
+  title: Expenses API
+  version: '1.0'
+  summary: REST API of the expenses App. It allows to create users and register expenses for them.
+  license:
+    name: MIT
+    identifier: MIT
+servers:
+  - url: 'http://localhost:3000'
+paths:
+  /:
+    get:
+      summary: Status
+      tags:
+        - status
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  status:
+                    type: string
+                    minLength: 1
+                required:
+                  - status
+                x-examples:
+                  example-1:
+                    status: The application is running
+              examples: {}
+      operationId: get
+      description: Endpoint to check if the API is up.
+  /users:
+    post:
+      summary: Create a new user
+      tags:
+        - user
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                x-examples:
+                  example-1:
+                    message: An email was sent with a link to activate your user. The link is valid for six hours
+                properties:
+                  message:
+                    type: string
+                    minLength: 1
+                    example: An email was sent with a link to activate your user. The link is valid for six hours
+                required:
+                  - message
+              examples:
+                Success:
+                  value:
+                    message: An email was sent with a link to activate your user. The link is valid for six hours
+          headers: {}
+      operationId: post-users
+      description: Creates a new user in the application
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              x-examples:
+                example-1:
+                  fullName: John Doe
+                  age: 30
+                  email: john@email.com
+                  password: anAwesomePasswordTomato
+              properties:
+                fullName:
+                  type: string
+                  maxLength: 300
+                  example: John Doe
+                age:
+                  type: number
+                  minimum: 0
+                  maximum: 200
+                  example: 25
+                email:
+                  type: string
+                  example: john@email.com
+                  minLength: 3
+                  maxLength: 254
+                password:
+                  type: string
+                  minLength: 5
+                  example: aSuperSecurePassword
+                  maxLength: 60
+              required:
+                - email
+                - password
+components:
+  schemas:
+    User:
+      description: Basic User Information
+      type: object
+      x-examples:
+        example-1:
+          id: string
+          fullName: string
+          age: number
+          email: string
+      properties:
+        id:
+          type: string
+          minLength: 1
+          format: uuid
+        fullName:
+          type: string
+          example: John Doe
+          maxLength: 300
+        age:
+          type: number
+          example: 25
+          minimum: 0
+          maximum: 200
+        email:
+          type: string
+          format: email
+          example: john@email.com
+          maxLength: 254
+          minLength: 3
+      required:
+        - id
+        - fullName
+        - age
+        - email
+      title: Basic User
+  securitySchemes:
+    some-key:
+      name: Authorization
+      type: apiKey
+      in: header
+security:
+  - test-api-key: []
