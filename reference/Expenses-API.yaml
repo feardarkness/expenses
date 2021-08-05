@@ -27,6 +27,7 @@ paths:
       description: Endpoint to check if the API is up.
       tags:
         - Status
+      security: []
   /users:
     post:
       summary: Create a User
@@ -87,6 +88,7 @@ paths:
                 - password
       tags:
         - Users
+      security: []
   '/users/{userId}':
     get:
       summary: Get a User
@@ -200,6 +202,7 @@ paths:
       tags:
         - Users
       description: Activate a new user. A user only can login after the account is activated.
+      security: []
   /users/activation:
     parameters: []
     post:
@@ -254,6 +257,7 @@ paths:
         description: ''
       tags:
         - Users
+      security: []
   /login:
     post:
       summary: Login
