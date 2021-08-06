@@ -41,7 +41,14 @@ export default class ListQueryBuilder {
   }
 
   static buildLimitQuery(limit: string = "100") {
-    return parseInt(limit);
+    let intLimit = parseInt(limit);
+    if (intLimit > 100) {
+      intLimit = 100;
+    }
+    if (intLimit < 1) {
+      intLimit = 1;
+    }
+    return intLimit;
   }
 
   static buildOffsetQuery(offset: string = "0") {
@@ -50,6 +57,7 @@ export default class ListQueryBuilder {
 
   static buildQuery(queryParams: ExpenseListParamsInterface, fieldToOrderByDefault: string = "updatedAt") {
     const limit = this.buildLimitQuery(queryParams.limit);
+
     const offset = this.buildOffsetQuery(queryParams.offset);
 
     const order = this.buildOrderQuery(queryParams.order, fieldToOrderByDefault);

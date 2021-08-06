@@ -1,6 +1,5 @@
 import bunyan from "bunyan";
 import path from "path";
-import DateCommon from "./date-common";
 import configs from "../configs/index";
 
 const environment = process.env.NODE_ENV;

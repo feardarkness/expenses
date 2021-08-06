@@ -27,6 +27,7 @@ const createUserSchema: JSONSchemaType<UserDto> = {
       type: "string",
       nullable: false,
       minLength: 5,
+      maxLength: 60,
     },
   },
   required: ["email", "password"],
