@@ -6,6 +6,8 @@ info:
     name: MIT
     identifier: MIT
   description: REST API of the expenses App. It allows to create users and register expenses for them.
+  contact:
+    name: Ariel Alvarado
 servers:
   - url: 'http://localhost:3000'
 paths:
@@ -37,7 +39,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/SuccessResponse'
               examples:
                 Success:
                   value:
@@ -48,7 +50,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InvalidData'
+                $ref: '#/components/schemas/InvalidDataResponse'
       operationId: post-users
       description: 'Creates a new user in the application. If the user is already created but not active yet, it will send an activation email to the user.'
       requestBody:
@@ -106,11 +108,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InvalidData'
+                $ref: '#/components/schemas/InvalidDataResponse'
       operationId: 'get-users-:userId'
       description: Get the basic user information
       security:
-        - User Bearer Authorization: []
+        - UserBearerAuthorization: []
     put:
       summary: Update a User
       operationId: 'put-users-:userId'
@@ -130,10 +132,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InvalidData'
+                $ref: '#/components/schemas/InvalidDataResponse'
       description: Modify basic user data
       security:
-        - User Bearer Authorization: []
+        - UserBearerAuthorization: []
       requestBody:
         content:
           application/json:
@@ -234,7 +236,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InvalidData'
+                $ref: '#/components/schemas/InvalidDataResponse'
       description: Send an activation email to a new user. Only activated users can use the application.
       requestBody:
         content:
@@ -302,10 +304,11 @@ paths:
                 - password
             examples: {}
       description: Login to the application. This endpoint will return the tokens required to consume all secured endpoints.
+      security: []
   /login/refresh:
     post:
       summary: Refresh Tokens
-      operationId: post-login
+      operationId: post-refresh
       responses:
         '200':
           description: OK
@@ -339,26 +342,15 @@ paths:
             examples: {}
       description: 'Refresh the authorization tokens. Only one refresh token per time is valid, if you request a new one the older one will not be valid. This endpoint required a Bearer token, but the backend will not validate the expiration claim.'
       security:
-        - User Bearer Authorization: []
+        - UserBearerAuthorization: []
     parameters: []
   /logout:
     post:
       summary: Logout
-      operationId: post-login
+      operationId: post-logout
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuthToken'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UnauthorizedResponse'
-        '':
           content:
             application/json:
               schema:
@@ -367,11 +359,17 @@ paths:
                 Success:
                   value:
                     message: Logout completed
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
       tags:
         - Login/Logout
       description: Logout from the application. The token and refresh token associated will not be valid after calling this route.
       security:
-        - User Bearer Authorization: []
+        - UserBearerAuthorization: []
     parameters: []
   /things:
     get:
@@ -399,7 +397,7 @@ paths:
                   value:
                     limit: 100
                     offset: 0
-                    order: 'field1,field2'
+                    total: 300
                     records:
                       - name: Food
                         description: All expenses related to food will be saved here
@@ -409,7 +407,7 @@ paths:
                         userId: 2c4a230c-5085-4924-a3e1-25fb4fc5965b
       operationId: get-things
       security:
-        - User Bearer Authorization: []
+        - UserBearerAuthorization: []
       description: |-
         Get all things associated with the user. To return records in descending order use "-". Example: "-UpdatedAt". 
 
@@ -417,7 +415,7 @@ paths:
       parameters:
         - schema:
             type: number
-            example: '50'
+            example: 50
             maxLength: 4
             minimum: 1
             maximum: 100
@@ -436,6 +434,7 @@ paths:
             default: '-updatedAt'
             enum:
               - updatedAt
+              - '-updatedAt'
           in: query
           name: order
           description: The results will be ordered by this field
@@ -473,7 +472,7 @@ paths:
                 $ref: '#/components/schemas/InvalidDataResponse'
       operationId: post-things
       security:
-        - User Bearer Authorization: []
+        - UserBearerAuthorization: []
       description: Create a new thing. Things are needed to create expenses later. A thing can be associated with multiple expenses.
       requestBody:
         content:
@@ -669,7 +668,7 @@ components:
       examples:
         - limit: 100
           offset: 0
-          order: 'field1,field2'
+          total: 300
       properties:
         limit:
           type: integer
@@ -685,16 +684,20 @@ components:
         - offset
         - total
   securitySchemes:
-    User Bearer Authorization:
+    UserBearerAuthorization:
       name: Authorization
       type: apiKey
       in: header
-    Admin Bearer Authorization:
+    AdminBearerAuthorization:
       name: Authorization
       type: apiKey
       in: header
-      description: ''
   responses: {}
+tags:
+  - name: Users
+  - name: Things
+  - name: Login/Logout
+  - name: Status
 security:
   - test-api-key: []
   - Admin Bearer Authorization: []
