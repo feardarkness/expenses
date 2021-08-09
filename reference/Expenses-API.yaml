@@ -480,6 +480,181 @@ paths:
             schema:
               $ref: '#/components/schemas/BasicThing'
         description: ''
+  /expenses:
+    post:
+      summary: Create Expense
+      tags:
+        - Expenses
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expense'
+              examples:
+                Success:
+                  value:
+                    id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                    amount: 150
+                    thingId: 0cb8996d-0744-4578-b7a6-e1e938152e35
+                    userId: 2c4a230c-5085-4924-a3e1-25fb4fc5965b
+                    date: '2021-08-06'
+                    createdAt: '2019-08-24T14:15:22Z'
+                    updatedAt: '2019-08-24T14:15:22Z'
+      operationId: post-expenses
+      security:
+        - UserBearerAuthorization: []
+      description: Create a new expense.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BasicExpense'
+            examples: {}
+    get:
+      summary: Get Expenses
+      tags:
+        - Expenses
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BasicPagination'
+                  - type: object
+                    properties:
+                      records:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Expense'
+              examples:
+                Success:
+                  value:
+                    limit: 100
+                    offset: 0
+                    total: 1
+                    records:
+                      - id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                        amount: 150
+                        thingId: 0cb8996d-0744-4578-b7a6-e1e938152e35
+                        userId: 2c4a230c-5085-4924-a3e1-25fb4fc5965b
+                        date: '2021-08-06'
+                        createdAt: '2019-08-24T14:15:22Z'
+                        updatedAt: '2019-08-24T14:15:22Z'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidDataResponse'
+      operationId: get-expenses
+      description: List all expenses of the user (paginated)
+      parameters:
+        - schema:
+            type: number
+            example: 50
+            maxLength: 4
+            minimum: 1
+            maximum: 100
+          in: query
+          name: limit
+          description: Limit the number of records returned
+        - schema:
+            type: number
+            minimum: 0
+            example: 120
+          in: query
+          name: offset
+          description: Number of records to be skipped
+        - schema:
+            type: string
+            default: '-updatedAt'
+            enum:
+              - updatedAt
+              - '-updatedAt'
+          in: query
+          name: order
+          description: The results will be ordered by this field
+      security:
+        - UserBearerAuthorization: []
+  '/expenses/{expenseId}':
+    parameters:
+      - schema:
+          type: string
+        name: expenseId
+        in: path
+        required: true
+    get:
+      summary: Get expense
+      tags:
+        - Expenses
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expense'
+              examples:
+                Success:
+                  value:
+                    id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                    amount: 150
+                    thingId: 0cb8996d-0744-4578-b7a6-e1e938152e35
+                    userId: 2c4a230c-5085-4924-a3e1-25fb4fc5965b
+                    date: '2021-08-06'
+                    createdAt: '2019-08-24T14:15:22Z'
+                    updatedAt: '2019-08-24T14:15:22Z'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidDataResponse'
+      operationId: get-expenses-expenseId
+      security:
+        - UserBearerAuthorization: []
+      description: Get an expense by id.
+    put:
+      summary: Update an expense
+      tags:
+        - Expenses
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expense'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidDataResponse'
+      operationId: put-expenses-expenseId
+      security:
+        - UserBearerAuthorization: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BasicExpense'
+      description: Update an expense by id. The updatedAt field will be modified accordingly.
+    delete:
+      summary: Delete an expense
+      tags:
+        - Expenses
+      responses:
+        '204':
+          description: No Content
+      operationId: delete-expenses-expenseId
+      security:
+        - UserBearerAuthorization: []
+      description: It will delete the expense by id. There is no way to undo this operation.
 components:
   schemas:
     User:
@@ -683,6 +858,77 @@ components:
         - limit
         - offset
         - total
+    BasicExpense:
+      description: Basic expense model
+      type: object
+      x-examples:
+        example-1:
+          amount: 150
+          thingId: 0cb8996d-0744-4578-b7a6-e1e938152e35
+          date: '2021-08-06'
+      properties:
+        amount:
+          type: number
+          minimum: 0
+          multipleOf: 0.01
+        thingId:
+          type: string
+          minLength: 1
+        date:
+          type: string
+          minLength: 1
+      required:
+        - amount
+        - thingId
+        - date
+      examples:
+        - amount: 150
+          thingId: 0cb8996d-0744-4578-b7a6-e1e938152e35
+          date: '2021-08-06'
+    Expense:
+      description: Expense Model
+      x-examples:
+        example-1:
+          id: 399f5eea-ad4d-47d9-8a57-418d2f70b932
+          amount: 150
+          thingId: 0cb8996d-0744-4578-b7a6-e1e938152e35
+          userId: 8ad50083-c92e-4e39-b851-269ef03c4f8b
+          date: '2021-08-06'
+          createdAt: '2021-08-06T11:23:47-04:00'
+          updatedAt: '2021-08-06T11:23:47-04:00'
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+              minLength: 1
+              format: uuid
+            userId:
+              type: string
+              minLength: 1
+              format: uuid
+            createdAt:
+              type: string
+              minLength: 1
+              format: date-time
+            updatedAt:
+              type: string
+              minLength: 1
+              format: date-time
+          required:
+            - id
+            - userId
+            - createdAt
+            - updatedAt
+        - $ref: '#/components/schemas/BasicExpense'
+      examples:
+        - id: 399f5eea-ad4d-47d9-8a57-418d2f70b932
+          amount: 150
+          thingId: 0cb8996d-0744-4578-b7a6-e1e938152e35
+          userId: 8ad50083-c92e-4e39-b851-269ef03c4f8b
+          date: '2021-08-06'
+          createdAt: '2021-08-06T11:23:47-04:00'
+          updatedAt: '2021-08-06T11:23:47-04:00'
   securitySchemes:
     UserBearerAuthorization:
       name: Authorization
@@ -698,6 +944,7 @@ tags:
   - name: Things
   - name: Login/Logout
   - name: Status
+  - name: Expenses
 security:
   - test-api-key: []
   - Admin Bearer Authorization: []
