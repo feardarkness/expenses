@@ -628,7 +628,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Expense'
+                $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                Success:
+                  value:
+                    message: Expense updated successfully
         '400':
           description: Bad Request
           content:
