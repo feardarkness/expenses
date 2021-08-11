@@ -1,11 +1,11 @@
 openapi: 3.1.0
 info:
-  title: Expenses API
+  title: Ledger API
   version: '1.0'
   license:
     name: MIT
     identifier: MIT
-  description: REST API of the expenses App. It allows to create users and register expenses for them.
+  description: REST API of the ledger App. It allows to create users and register expenses/income for them.
   contact:
     name: Ariel Alvarado
 servers:
@@ -948,7 +948,6 @@ components:
       in: header
   responses: {}
 tags:
-  - name: Expenses
   - name: Ledger
   - name: Login/Logout
   - name: Status
