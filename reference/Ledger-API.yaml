@@ -483,15 +483,13 @@ paths:
   /ledgers:
     post:
       summary: Create Entry
-      tags:
-        - Expenses
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Expense'
+                $ref: '#/components/schemas/Ledger'
               examples:
                 Success:
                   value:
@@ -510,12 +508,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/BasicExpense'
+              $ref: '#/components/schemas/BasicLedger'
             examples: {}
+        description: ''
+      tags:
+        - Ledger
     get:
       summary: Get Entries
       tags:
-        - Expenses
+        - Ledger
       responses:
         '200':
           description: OK
@@ -529,7 +530,7 @@ paths:
                       records:
                         type: array
                         items:
-                          $ref: '#/components/schemas/Expense'
+                          $ref: '#/components/schemas/Ledger'
               examples:
                 Success:
                   value:
@@ -590,15 +591,13 @@ paths:
         required: true
     get:
       summary: Get entry
-      tags:
-        - Expenses
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Expense'
+                $ref: '#/components/schemas/Ledger'
               examples:
                 Success:
                   value:
@@ -619,10 +618,10 @@ paths:
       security:
         - UserBearerAuthorization: []
       description: Get an entry of the ledger by id.
+      tags:
+        - Ledger
     put:
       summary: Update an entry
-      tags:
-        - Expenses
       responses:
         '200':
           description: OK
@@ -647,12 +646,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/BasicExpense'
+              $ref: '#/components/schemas/BasicLedger'
       description: Update an entry in the ledger by id. The updatedAt field will be modified accordingly.
+      tags:
+        - Ledger
     delete:
       summary: Delete an entry
-      tags:
-        - Expenses
       responses:
         '204':
           description: No Content
@@ -660,6 +659,8 @@ paths:
       security:
         - UserBearerAuthorization: []
       description: It will delete an entry by id. There is no way to undo this operation.
+      tags:
+        - Ledger
 components:
   schemas:
     User:
@@ -863,8 +864,8 @@ components:
         - limit
         - offset
         - total
-    BasicExpense:
-      description: Basic expense model
+    BasicLedger:
+      description: Basic ledger model
       type: object
       x-examples:
         example-1:
@@ -891,8 +892,8 @@ components:
           thingId: 0cb8996d-0744-4578-b7a6-e1e938152e35
           date: '2021-08-06'
       title: BasicLedger
-    Expense:
-      description: Expense Model
+    Ledger:
+      description: Ledger Model
       x-examples:
         example-1:
           id: 399f5eea-ad4d-47d9-8a57-418d2f70b932
@@ -926,7 +927,7 @@ components:
             - userId
             - createdAt
             - updatedAt
-        - $ref: '#/components/schemas/BasicExpense'
+        - $ref: '#/components/schemas/BasicLedger'
       examples:
         - id: 399f5eea-ad4d-47d9-8a57-418d2f70b932
           amount: 150
@@ -947,11 +948,12 @@ components:
       in: header
   responses: {}
 tags:
-  - name: Users
-  - name: Things
+  - name: Expenses
+  - name: Ledger
   - name: Login/Logout
   - name: Status
-  - name: Expenses
+  - name: Things
+  - name: Users
 security:
   - test-api-key: []
   - Admin Bearer Authorization: []
