@@ -480,9 +480,9 @@ paths:
             schema:
               $ref: '#/components/schemas/BasicThing'
         description: ''
-  /expenses:
+  /ledgers:
     post:
-      summary: Create Expense
+      summary: Create Entry
       tags:
         - Expenses
       responses:
@@ -502,10 +502,10 @@ paths:
                     date: '2021-08-06'
                     createdAt: '2019-08-24T14:15:22Z'
                     updatedAt: '2019-08-24T14:15:22Z'
-      operationId: post-expenses
+      operationId: post-entries
       security:
         - UserBearerAuthorization: []
-      description: Create a new expense.
+      description: Create a new entry.
       requestBody:
         content:
           application/json:
@@ -513,7 +513,7 @@ paths:
               $ref: '#/components/schemas/BasicExpense'
             examples: {}
     get:
-      summary: Get Expenses
+      summary: Get Entries
       tags:
         - Expenses
       responses:
@@ -550,8 +550,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InvalidDataResponse'
-      operationId: get-expenses
-      description: List all expenses of the user (paginated)
+      operationId: get-entries
+      description: List all entries of the user (paginated)
       parameters:
         - schema:
             type: number
@@ -580,15 +580,16 @@ paths:
           description: The results will be ordered by this field
       security:
         - UserBearerAuthorization: []
-  '/expenses/{expenseId}':
+    parameters: []
+  '/ledgers/{entryId}':
     parameters:
       - schema:
           type: string
-        name: expenseId
+        name: entryId
         in: path
         required: true
     get:
-      summary: Get expense
+      summary: Get entry
       tags:
         - Expenses
       responses:
@@ -614,12 +615,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InvalidDataResponse'
-      operationId: get-expenses-expenseId
+      operationId: get-entries-entryId
       security:
         - UserBearerAuthorization: []
-      description: Get an expense by id.
+      description: Get an entry of the ledger by id.
     put:
-      summary: Update an expense
+      summary: Update an entry
       tags:
         - Expenses
       responses:
@@ -639,7 +640,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InvalidDataResponse'
-      operationId: put-expenses-expenseId
+      operationId: put-entries-entryId
       security:
         - UserBearerAuthorization: []
       requestBody:
@@ -647,18 +648,18 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/BasicExpense'
-      description: Update an expense by id. The updatedAt field will be modified accordingly.
+      description: Update an entry in the ledger by id. The updatedAt field will be modified accordingly.
     delete:
-      summary: Delete an expense
+      summary: Delete an entry
       tags:
         - Expenses
       responses:
         '204':
           description: No Content
-      operationId: delete-expenses-expenseId
+      operationId: delete-entries-entryId
       security:
         - UserBearerAuthorization: []
-      description: It will delete the expense by id. There is no way to undo this operation.
+      description: It will delete an entry by id. There is no way to undo this operation.
 components:
   schemas:
     User:
@@ -889,6 +890,7 @@ components:
         - amount: 150
           thingId: 0cb8996d-0744-4578-b7a6-e1e938152e35
           date: '2021-08-06'
+      title: BasicLedger
     Expense:
       description: Expense Model
       x-examples:
@@ -933,6 +935,7 @@ components:
           date: '2021-08-06'
           createdAt: '2021-08-06T11:23:47-04:00'
           updatedAt: '2021-08-06T11:23:47-04:00'
+      title: Ledger
   securitySchemes:
     UserBearerAuthorization:
       name: Authorization
