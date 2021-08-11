@@ -1,11 +1,11 @@
 openapi: 3.1.0
 info:
-  title: Expenses API
+  title: Ledger API
   version: '1.0'
   license:
     name: MIT
     identifier: MIT
-  description: REST API of the expenses App. It allows to create users and register expenses for them.
+  description: REST API of the ledger App. It allows to create users and register expenses/income for them.
   contact:
     name: Ariel Alvarado
 servers:
@@ -480,6 +480,187 @@ paths:
             schema:
               $ref: '#/components/schemas/BasicThing'
         description: ''
+  /ledgers:
+    post:
+      summary: Create Entry
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ledger'
+              examples:
+                Success:
+                  value:
+                    id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                    amount: 150
+                    thingId: 0cb8996d-0744-4578-b7a6-e1e938152e35
+                    userId: 2c4a230c-5085-4924-a3e1-25fb4fc5965b
+                    date: '2021-08-06'
+                    createdAt: '2019-08-24T14:15:22Z'
+                    updatedAt: '2019-08-24T14:15:22Z'
+      operationId: post-entries
+      security:
+        - UserBearerAuthorization: []
+      description: Create a new entry.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BasicLedger'
+            examples: {}
+        description: ''
+      tags:
+        - Ledger
+    get:
+      summary: Get Entries
+      tags:
+        - Ledger
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BasicPagination'
+                  - type: object
+                    properties:
+                      records:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Ledger'
+              examples:
+                Success:
+                  value:
+                    limit: 100
+                    offset: 0
+                    total: 1
+                    records:
+                      - id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                        amount: 150
+                        thingId: 0cb8996d-0744-4578-b7a6-e1e938152e35
+                        userId: 2c4a230c-5085-4924-a3e1-25fb4fc5965b
+                        date: '2021-08-06'
+                        createdAt: '2019-08-24T14:15:22Z'
+                        updatedAt: '2019-08-24T14:15:22Z'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidDataResponse'
+      operationId: get-entries
+      description: List all entries of the user (paginated)
+      parameters:
+        - schema:
+            type: number
+            example: 50
+            maxLength: 4
+            minimum: 1
+            maximum: 100
+          in: query
+          name: limit
+          description: Limit the number of records returned
+        - schema:
+            type: number
+            minimum: 0
+            example: 120
+          in: query
+          name: offset
+          description: Number of records to be skipped
+        - schema:
+            type: string
+            default: '-updatedAt'
+            enum:
+              - updatedAt
+              - '-updatedAt'
+          in: query
+          name: order
+          description: The results will be ordered by this field
+      security:
+        - UserBearerAuthorization: []
+    parameters: []
+  '/ledgers/{entryId}':
+    parameters:
+      - schema:
+          type: string
+        name: entryId
+        in: path
+        required: true
+    get:
+      summary: Get entry
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ledger'
+              examples:
+                Success:
+                  value:
+                    id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                    amount: 150
+                    thingId: 0cb8996d-0744-4578-b7a6-e1e938152e35
+                    userId: 2c4a230c-5085-4924-a3e1-25fb4fc5965b
+                    date: '2021-08-06'
+                    createdAt: '2019-08-24T14:15:22Z'
+                    updatedAt: '2019-08-24T14:15:22Z'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidDataResponse'
+      operationId: get-entries-entryId
+      security:
+        - UserBearerAuthorization: []
+      description: Get an entry of the ledger by id.
+      tags:
+        - Ledger
+    put:
+      summary: Update an entry
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                Success:
+                  value:
+                    message: Expense updated successfully
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidDataResponse'
+      operationId: put-entries-entryId
+      security:
+        - UserBearerAuthorization: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BasicLedger'
+      description: Update an entry in the ledger by id. The updatedAt field will be modified accordingly.
+      tags:
+        - Ledger
+    delete:
+      summary: Delete an entry
+      responses:
+        '204':
+          description: No Content
+      operationId: delete-entries-entryId
+      security:
+        - UserBearerAuthorization: []
+      description: It will delete an entry by id. There is no way to undo this operation.
+      tags:
+        - Ledger
 components:
   schemas:
     User:
@@ -683,6 +864,79 @@ components:
         - limit
         - offset
         - total
+    BasicLedger:
+      description: Basic ledger model
+      type: object
+      x-examples:
+        example-1:
+          amount: 150
+          thingId: 0cb8996d-0744-4578-b7a6-e1e938152e35
+          date: '2021-08-06'
+      properties:
+        amount:
+          type: number
+          minimum: 0
+          multipleOf: 0.01
+        thingId:
+          type: string
+          minLength: 1
+        date:
+          type: string
+          minLength: 1
+      required:
+        - amount
+        - thingId
+        - date
+      examples:
+        - amount: 150
+          thingId: 0cb8996d-0744-4578-b7a6-e1e938152e35
+          date: '2021-08-06'
+      title: BasicLedger
+    Ledger:
+      description: Ledger Model
+      x-examples:
+        example-1:
+          id: 399f5eea-ad4d-47d9-8a57-418d2f70b932
+          amount: 150
+          thingId: 0cb8996d-0744-4578-b7a6-e1e938152e35
+          userId: 8ad50083-c92e-4e39-b851-269ef03c4f8b
+          date: '2021-08-06'
+          createdAt: '2021-08-06T11:23:47-04:00'
+          updatedAt: '2021-08-06T11:23:47-04:00'
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+              minLength: 1
+              format: uuid
+            userId:
+              type: string
+              minLength: 1
+              format: uuid
+            createdAt:
+              type: string
+              minLength: 1
+              format: date-time
+            updatedAt:
+              type: string
+              minLength: 1
+              format: date-time
+          required:
+            - id
+            - userId
+            - createdAt
+            - updatedAt
+        - $ref: '#/components/schemas/BasicLedger'
+      examples:
+        - id: 399f5eea-ad4d-47d9-8a57-418d2f70b932
+          amount: 150
+          thingId: 0cb8996d-0744-4578-b7a6-e1e938152e35
+          userId: 8ad50083-c92e-4e39-b851-269ef03c4f8b
+          date: '2021-08-06'
+          createdAt: '2021-08-06T11:23:47-04:00'
+          updatedAt: '2021-08-06T11:23:47-04:00'
+      title: Ledger
   securitySchemes:
     UserBearerAuthorization:
       name: Authorization
@@ -694,10 +948,11 @@ components:
       in: header
   responses: {}
 tags:
-  - name: Users
-  - name: Things
+  - name: Ledger
   - name: Login/Logout
   - name: Status
+  - name: Things
+  - name: Users
 security:
   - test-api-key: []
   - Admin Bearer Authorization: []
