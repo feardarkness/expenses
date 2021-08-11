@@ -1,7 +1,7 @@
 import "dotenv/config";
 import app from "../../../app";
 import request from "supertest";
-import { Connection, createConnection } from "typeorm";
+import { Connection, createConnection, getManager } from "typeorm";
 import sinon from "sinon";
 import Mail from "../../common/mail";
 import chai from "chai";
@@ -394,11 +394,23 @@ describe("User routes", () => {
     });
   });
 
-  describe("[PUT /users/status]", () => {
-    it("should activate a user", async () => {
-      const { status } = await request(app).put("/users/status").query({
+  describe("[GET /users/status]", () => {
+    it("should activate a user and delete the token if used", async () => {
+      const tokenRepository = getManager().getRepository(Token);
+      const tokensFound = await tokenRepository.find({
         token: userToBeActivatedActivationToken.token,
       });
+      expect(tokensFound).to.have.length(1);
+
+      const { status } = await request(app).get("/users/status").query({
+        token: userToBeActivatedActivationToken.token,
+      });
+
+      const tokensFoundAfterActivating = await tokenRepository.find({
+        token: userToBeActivatedActivationToken.token,
+      });
+
+      expect(tokensFoundAfterActivating).to.have.length(0);
 
       expect(status).to.equal(200);
 
@@ -407,7 +419,7 @@ describe("User routes", () => {
     });
 
     it("should fail with an invalid token", async () => {
-      const { status } = await request(app).put("/users/status").query({
+      const { status } = await request(app).get("/users/status").query({
         token: "not-a-real-token",
       });
 

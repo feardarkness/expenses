@@ -1,5 +1,7 @@
 import { JSONSchemaType } from "ajv";
 import { UserDto } from "../../../components/users/users.dto";
+import { LedgerEntryType } from "../../enums/LedgerEntryType";
+import { ReportType } from "../../enums/ReportType";
 
 const createUserSchema: JSONSchemaType<UserDto> = {
   type: "object",
@@ -91,4 +93,41 @@ const activationTokenForUserSchema: JSONSchemaType<GenerateActivationTokenQuery>
   additionalProperties: false,
 };
 
-export { createUserSchema, activateUserSchema, updateUserSchema, activationTokenForUserSchema };
+interface ReportQuery {
+  periodicity: string;
+  groupBy?: string[];
+  things?: string[];
+}
+
+console.log();
+
+const reportQuerySchema: JSONSchemaType<ReportQuery> = {
+  type: "object",
+  properties: {
+    periodicity: {
+      type: "string",
+      enum: Object.keys(ReportType),
+    },
+    groupBy: {
+      type: "array",
+      nullable: true,
+      items: {
+        type: "string",
+        enum: ["thing"].concat(Object.keys(LedgerEntryType)),
+      },
+    },
+    things: {
+      type: "array",
+      nullable: true,
+      items: {
+        type: "string",
+        minLength: 36,
+        maxLength: 36,
+      },
+    },
+  },
+  required: ["periodicity"],
+  additionalProperties: false,
+};
+
+export { createUserSchema, activateUserSchema, updateUserSchema, activationTokenForUserSchema, reportQuerySchema };

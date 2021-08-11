@@ -1,8 +1,8 @@
 import { JSONSchemaType } from "ajv";
-import { ExpenseDto, ExpenseUpdateDto } from "../../../components/expenses/expenses.dto";
-import { ExpenseListParamsInterface } from "../../interfaces/list-params";
+import { LedgerDto } from "../../../components/ledger/ledger.dto";
+import { LedgerListParamsInterface } from "../../interfaces/list-params";
 
-const expenseListSchema: JSONSchemaType<ExpenseListParamsInterface> = {
+const ledgerListSchema: JSONSchemaType<LedgerListParamsInterface> = {
   type: "object",
   properties: {
     limit: {
@@ -30,7 +30,7 @@ const expenseListSchema: JSONSchemaType<ExpenseListParamsInterface> = {
   additionalProperties: false,
 };
 
-const expenseSchema: JSONSchemaType<ExpenseDto> = {
+const ledgerSchema: JSONSchemaType<LedgerDto> = {
   type: "object",
   properties: {
     amount: {
@@ -52,7 +52,7 @@ const expenseSchema: JSONSchemaType<ExpenseDto> = {
   additionalProperties: false,
 };
 
-const expenseUpdateSchema: JSONSchemaType<ExpenseUpdateDto> = {
+const ledgerUpdateSchema: JSONSchemaType<LedgerDto> = {
   type: "object",
   properties: {
     amount: {
@@ -60,13 +60,18 @@ const expenseUpdateSchema: JSONSchemaType<ExpenseUpdateDto> = {
       multipleOf: 0.01,
       minimum: 0,
     },
+    thingId: {
+      type: "string",
+      minLength: 36,
+      maxLength: 36,
+    },
     date: {
       type: "string",
       format: "date",
     },
   },
-  required: ["amount", "date"],
+  required: ["amount", "date", "thingId"],
   additionalProperties: false,
 };
 
-export { expenseSchema, expenseUpdateSchema, expenseListSchema };
+export { ledgerSchema, ledgerUpdateSchema, ledgerListSchema };

@@ -1,4 +1,4 @@
-# Simple Expenses Backend
+# Simple Ledger Backend
 
 REST API with JWT auth.
 

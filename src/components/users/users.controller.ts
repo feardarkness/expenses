@@ -69,6 +69,7 @@ export class UserController {
   async updateStatus(req: express.Request, res: express.Response) {
     log.trace(`[updateStatus]`, { userId: req.params.userId });
     await userService.activateUser(req.query.token as string);
+    // TODO send email of user activated
     res.status(200).json({
       message: "User activated successfully",
     });
@@ -96,6 +97,13 @@ export class UserController {
     res.status(200).json({
       message: `An email to activate your account will be sent shortly if your email account is registered.`,
     });
+  }
+
+  async generateReport(req: express.Request, res: express.Response) {
+    const data = {
+      a: 1,
+    };
+    res.status(200).json(data);
   }
 }
 

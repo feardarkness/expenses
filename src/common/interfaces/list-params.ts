@@ -4,7 +4,7 @@ export interface ListParamsInterface {
   order?: string;
 }
 
-export interface ExpenseListParamsInterface extends ListParamsInterface {
+export interface LedgerListParamsInterface extends ListParamsInterface {
   thingId?: string;
 }
 

@@ -13,7 +13,7 @@ import { UserRoutes } from "./src/components/users/users.routes";
 import { LoginRoutes } from "./src/components/auth/login.routes";
 import { LogoutRoutes } from "./src/components/auth/logout.routes";
 import { ThingRoutes } from "./src/components/things/things.routes";
-import { ExpenseRoutes } from "./src/components/expenses/expenses.routes";
+import { LedgerRoutes } from "./src/components/ledger/ledger.routes";
 
 const app: express.Application = express();
 
@@ -32,7 +32,7 @@ routes.push(new ThingRoutes());
 routes.push(new UserRoutes());
 routes.push(new LoginRoutes());
 routes.push(new LogoutRoutes());
-routes.push(new ExpenseRoutes());
+routes.push(new LedgerRoutes());
 
 routes.forEach((route) => {
   debugLog(`Routes configured for ${route.getName()}`);

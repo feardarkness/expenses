@@ -5,15 +5,15 @@ import ForbiddenError from "../../common/errors/forbidden-error";
 import { UserStatus } from "../../common/enums/UserStatus";
 import usersService from "./users.service";
 
-class UsersMiddleware {
-  private static instance: UsersMiddleware;
+class UserMiddleware {
+  private static instance: UserMiddleware;
 
   /* istanbul ignore next */
   static getInstance() {
-    if (!UsersMiddleware.instance) {
-      UsersMiddleware.instance = new UsersMiddleware();
+    if (!UserMiddleware.instance) {
+      UserMiddleware.instance = new UserMiddleware();
     }
-    return UsersMiddleware.instance;
+    return UserMiddleware.instance;
   }
 
   /**
@@ -44,6 +44,12 @@ class UsersMiddleware {
     next();
   }
 
+  /**
+   * Validates that the userId in the token os the same as the userId in the url
+   * @param req
+   * @param res
+   * @param next
+   */
   async validateUserAllowedByToken(req: express.Request, res: express.Response, next: express.NextFunction) {
     if (req.params.userId !== req.user.id) {
       throw new ForbiddenError("Forbidden");
@@ -52,4 +58,4 @@ class UsersMiddleware {
   }
 }
 
-export default UsersMiddleware.getInstance();
+export default UserMiddleware.getInstance();

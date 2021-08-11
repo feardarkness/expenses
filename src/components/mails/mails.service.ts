@@ -26,7 +26,7 @@ export class MailService extends CommonServicesConfig {
   sendActivationEmail(token: string, email: string) {
     this.sendEmail({
       from: configs.mail.from,
-      subject: "Account verification [Expenses App]",
+      subject: "Account verification [Ledger App]",
       text: `Follow the link to activate your account: ${configs.app.DOMAIN}/users/status?token=${token}. The token will be valid for ${configs.activationToken.expirationInHours} hours`,
       to: email,
     });

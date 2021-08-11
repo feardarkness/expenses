@@ -1,4 +1,4 @@
-import { ExpenseListParamsInterface } from "./interfaces/list-params";
+import { LedgerListParamsInterface } from "./interfaces/list-params";
 
 export default class ListQueryBuilder {
   static buildOrderQuery(queryOrder: string | undefined, fieldToOrderByDefault: string) {
@@ -26,7 +26,7 @@ export default class ListQueryBuilder {
     return order;
   }
 
-  static buildWhereQuery(queryWhere: ExpenseListParamsInterface) {
+  static buildWhereQuery(queryWhere: LedgerListParamsInterface) {
     const where = {};
     const queryParamsWithWhereClausesOnly = { ...queryWhere };
     delete queryParamsWithWhereClausesOnly.limit;
@@ -55,7 +55,7 @@ export default class ListQueryBuilder {
     return parseInt(offset);
   }
 
-  static buildQuery(queryParams: ExpenseListParamsInterface, fieldToOrderByDefault: string = "updatedAt") {
+  static buildQuery(queryParams: LedgerListParamsInterface, fieldToOrderByDefault: string = "updatedAt") {
     const limit = this.buildLimitQuery(queryParams.limit);
 
     const offset = this.buildOffsetQuery(queryParams.offset);

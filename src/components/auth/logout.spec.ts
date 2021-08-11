@@ -40,7 +40,7 @@ describe("Logout Routes", () => {
     if (connection) {
       await connection.query("DELETE FROM public.token_blacklist");
       await connection.query("DELETE FROM public.token_refresh");
-      await connection.query("DELETE FROM public.expense");
+      await connection.query("DELETE FROM public.ledger");
       await connection.query("DELETE FROM public.thing");
       await connection.query("DELETE FROM public.user");
       await connection.close();

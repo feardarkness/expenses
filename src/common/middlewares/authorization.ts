@@ -21,7 +21,7 @@ class AuthMiddleware {
   }
 
   /**
-   * Returns a middleware that will validate  a token
+   * Returns a middleware that will validate  a jwt token
    * @param ignoreExpiration true to return a function that will validate the token expiration, false to avoid that validation
    * @returns () => {} Function that will validate the token
    */
