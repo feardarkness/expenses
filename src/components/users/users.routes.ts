@@ -21,7 +21,8 @@ export class UserRoutes extends CommonRoutesConfig {
       asyncWrapper(userController.createUser)
     );
 
-    this.router.put(
+    // get so every user can access this route from the browser
+    this.router.get(
       "/status",
       asyncWrapper(validateMiddleware.validateData("activateUserSchema", "query")),
       asyncWrapper(userController.updateStatus)
@@ -32,6 +33,17 @@ export class UserRoutes extends CommonRoutesConfig {
       asyncWrapper(validateMiddleware.validateData("activationTokenForUserSchema", "body")),
       asyncWrapper(userController.sendActivationEmail)
     );
+
+    this.router
+      .all(
+        `/:userId/reports`,
+        asyncWrapper(authMiddleware.validateToken()),
+        asyncWrapper(authMiddleware.userTypeAllowed([UserType.user])),
+        asyncWrapper(validateMiddleware.validateData("reportQuerySchema", "query")),
+        asyncWrapper(validateMiddleware.validateUuidInPath("userId")),
+        asyncWrapper(userMiddleware.validateUserAllowedByToken)
+      )
+      .get(`/:userId/reports`, userController.generateReport);
 
     this.router
       .all(

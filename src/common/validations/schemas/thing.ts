@@ -9,6 +9,7 @@ const thingListSchema: JSONSchemaType<ThingListParamsInterface> = {
       type: "string",
       nullable: true,
       pattern: "^\\d+$",
+      maxLength: 4,
     },
     offset: {
       type: "string",

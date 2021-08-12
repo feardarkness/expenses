@@ -11,7 +11,8 @@ import loginService from "../auth/login.service";
 
 import { UserType } from "../../common/enums/UserType";
 import { Thing } from "../things/things.entity";
-import { Expense } from "./expenses.entity";
+import { Ledger } from "./ledger.entity";
+import { LedgerEntryType } from "../../common/enums/LedgerEntryType";
 
 let expect = chai.expect;
 chai.use(sinonChai);
@@ -20,21 +21,22 @@ let sinonSandbox: sinon.SinonSandbox;
 let connection: Connection;
 
 let user1: User;
-const user1Email = "expenseThing@email.com";
+const user1Email = "ledgerThing@email.com";
 let user1JWT: string;
 
 let user3JWT: string;
 
 let thing1user1: Thing;
+let thing2user2: Thing;
 let thing3user3: Thing;
 
-let expense1user1: Expense;
-let expense2user2: Expense;
-let expense3user1: Expense;
-let expense4user3: Expense;
-let expense5user3: Expense;
+let ledgerEntry1user1: Ledger;
+let ledgerEntry2user2: Ledger;
+let ledgerEntry3user1: Ledger;
+let ledgerEntry4user3: Ledger;
+let ledgerEntry5user3: Ledger;
 
-describe("Expense routes", () => {
+describe("Ledger routes", () => {
   before(async () => {
     connection = await createConnection();
     const repository = connection.getRepository(User);
@@ -72,7 +74,7 @@ describe("Expense routes", () => {
     thing1user1.user = user1;
     await thingRepository.save(thing1user1);
 
-    let thing2user2 = new Thing();
+    thing2user2 = new Thing();
     thing2user2.name = "A thing 2";
     thing2user2.description = "A thing description 2";
     thing2user2.user = user2;
@@ -84,42 +86,47 @@ describe("Expense routes", () => {
     thing3user3.user = user3;
     await thingRepository.save(thing3user3);
 
-    const expenseRepository = connection.getRepository(Expense);
+    const ledgerRepository = connection.getRepository(Ledger);
 
-    expense1user1 = new Expense();
-    expense1user1.amount = 50.0;
-    expense1user1.thing = thing1user1;
-    expense1user1.user = user1;
-    await expenseRepository.save(expense1user1);
+    ledgerEntry1user1 = new Ledger();
+    ledgerEntry1user1.amount = 50.0;
+    ledgerEntry1user1.type = LedgerEntryType.expense;
+    ledgerEntry1user1.thing = thing1user1;
+    ledgerEntry1user1.user = user1;
+    await ledgerRepository.save(ledgerEntry1user1);
 
-    expense2user2 = new Expense();
-    expense2user2.amount = 500.0;
-    expense2user2.thing = thing2user2;
-    expense2user2.user = user2;
-    await expenseRepository.save(expense2user2);
+    ledgerEntry2user2 = new Ledger();
+    ledgerEntry2user2.type = LedgerEntryType.expense;
+    ledgerEntry2user2.amount = 500.0;
+    ledgerEntry2user2.thing = thing2user2;
+    ledgerEntry2user2.user = user2;
+    await ledgerRepository.save(ledgerEntry2user2);
 
-    expense3user1 = new Expense();
-    expense3user1.amount = 90.0;
-    expense3user1.thing = thing1user1;
-    expense3user1.user = user1;
-    await expenseRepository.save(expense3user1);
+    ledgerEntry3user1 = new Ledger();
+    ledgerEntry3user1.type = LedgerEntryType.income;
+    ledgerEntry3user1.amount = 90.0;
+    ledgerEntry3user1.thing = thing1user1;
+    ledgerEntry3user1.user = user1;
+    await ledgerRepository.save(ledgerEntry3user1);
 
-    expense4user3 = new Expense();
-    expense4user3.amount = 90.0;
-    expense4user3.thing = thing3user3;
-    expense4user3.user = user3;
-    await expenseRepository.save(expense4user3);
+    ledgerEntry4user3 = new Ledger();
+    ledgerEntry4user3.type = LedgerEntryType.income;
+    ledgerEntry4user3.amount = 90.0;
+    ledgerEntry4user3.thing = thing3user3;
+    ledgerEntry4user3.user = user3;
+    await ledgerRepository.save(ledgerEntry4user3);
 
-    expense5user3 = new Expense();
-    expense5user3.amount = 100.0;
-    expense5user3.thing = thing3user3;
-    expense5user3.user = user3;
-    await expenseRepository.save(expense5user3);
+    ledgerEntry5user3 = new Ledger();
+    ledgerEntry5user3.type = LedgerEntryType.expense;
+    ledgerEntry5user3.amount = 100.0;
+    ledgerEntry5user3.thing = thing3user3;
+    ledgerEntry5user3.user = user3;
+    await ledgerRepository.save(ledgerEntry5user3);
   });
 
   after(async () => {
     if (connection) {
-      await connection.query("DELETE FROM public.expense");
+      await connection.query("DELETE FROM public.ledger");
       await connection.query("DELETE FROM public.thing");
       await connection.query("DELETE FROM public.user");
       await connection.close();
@@ -134,24 +141,26 @@ describe("Expense routes", () => {
     sinonSandbox.restore();
   });
 
-  describe("[GET /expenses/:expenseId]", () => {
+  describe("[GET /ledgers/:entryId]", () => {
     it("should fail without a valid JWT", async () => {
-      const { body, status } = await request(app).get(`/expenses/${expense3user1.id}`).set("Authorization", `Bearer `);
+      const { body, status } = await request(app)
+        .get(`/ledgers/${ledgerEntry3user1.id}`)
+        .set("Authorization", `Bearer `);
 
       expect(status).to.equal(401);
     });
 
-    it("should fail if the expenseId belongs to another user", async () => {
+    it("should fail if the entryId belongs to another user", async () => {
       const { body, status } = await request(app)
-        .get(`/expenses/${expense2user2.id}`)
+        .get(`/ledgers/${ledgerEntry2user2.id}`)
         .set("Authorization", `Bearer ${user1JWT}`);
 
       expect(status).to.equal(404);
     });
 
-    it("should get an expense by id", async () => {
+    it("should get an ledger by id", async () => {
       const { body, status } = await request(app)
-        .get(`/expenses/${expense3user1.id}`)
+        .get(`/ledgers/${ledgerEntry3user1.id}`)
         .set("Authorization", `Bearer ${user1JWT}`);
 
       expect(status).to.equal(200);
@@ -161,12 +170,14 @@ describe("Expense routes", () => {
     });
   });
 
-  describe("[PUT /expenses/:expenseId]", () => {
+  describe("[PUT /ledgers/:entryId]", () => {
     it("should fail without a valid JWT", async () => {
       const { body, status } = await request(app)
-        .put(`/expenses/${expense3user1.id}`)
+        .put(`/ledgers/${ledgerEntry3user1.id}`)
         .send({
           amount: 1234.8,
+          thingId: thing1user1.id,
+          type: LedgerEntryType.expense,
           date: "2021-02-25",
         })
         .set("Authorization", `Bearer `);
@@ -174,38 +185,84 @@ describe("Expense routes", () => {
       expect(status).to.equal(401);
     });
 
-    it("should fail if the expenseId belongs to another user", async () => {
+    it("should fail if no type is sent", async () => {
       const { body, status } = await request(app)
-        .put(`/expenses/${expense2user2.id}`)
+        .put(`/ledgers/${ledgerEntry2user2.id}`)
         .send({
           amount: 1234.8,
+          thingId: thing1user1.id,
+          date: "2021-02-25",
+        })
+        .set("Authorization", `Bearer ${user1JWT}`);
+
+      expect(status).to.equal(400);
+
+      expect(body).to.deep.equal({
+        error: "Invalid data",
+        detail: ["should have required property 'type'"],
+      });
+    });
+
+    it("should fail if the entryId belongs to another user", async () => {
+      const { body, status } = await request(app)
+        .put(`/ledgers/${ledgerEntry2user2.id}`)
+        .send({
+          amount: 1234.8,
+          thingId: thing1user1.id,
+          type: LedgerEntryType.expense,
           date: "2021-02-25",
         })
         .set("Authorization", `Bearer ${user1JWT}`);
 
       expect(status).to.equal(404);
+
+      expect(body).to.deep.equal({
+        error: "Entry not found",
+      });
     });
 
-    it("should update an expense by id", async () => {
+    it("should fail if the thingId belongs to another user", async () => {
       const { body, status } = await request(app)
-        .put(`/expenses/${expense3user1.id}`)
+        .put(`/ledgers/${ledgerEntry1user1.id}`)
         .send({
-          amount: 444555.8,
+          amount: 1234.8,
+          thingId: thing2user2.id,
+          type: LedgerEntryType.expense,
           date: "2021-02-25",
         })
         .set("Authorization", `Bearer ${user1JWT}`);
 
+      expect(status).to.equal(400);
+      expect(body).to.deep.equal({ error: "Thing not found or doesn't belong to the user", detail: [] });
+    });
+
+    it("should update an entry by id", async () => {
+      const { body, status } = await request(app)
+        .put(`/ledgers/${ledgerEntry3user1.id}`)
+        .send({
+          amount: 444555.8,
+          thingId: thing1user1.id,
+          type: LedgerEntryType.income,
+          date: "2021-02-25",
+        })
+        .set("Authorization", `Bearer ${user1JWT}`);
+
+      const ledgerRepository = getManager().getRepository(Ledger);
+      const ledger = await ledgerRepository.find({
+        id: ledgerEntry3user1.id,
+      });
+
       expect(status).to.equal(200);
       expect(body).to.deep.equal({
-        message: "Expense updated successfully",
+        message: "Entry updated successfully",
       });
     });
   });
 
-  describe("[DELETE /expenses/:expenseId]", () => {
+  describe("[DELETE /ledgers/:entryId]", () => {
     it("should fail without a valid JWT", async () => {
       const { body, status } = await request(app)
-        .delete(`/expenses/${expense1user1.id}`)
+        .delete(`/ledgers/${ledgerEntry1user1.id}`)
         .set("Authorization", `Bearer `);
 
       expect(status).to.equal(401);
@@ -213,48 +270,48 @@ describe("Expense routes", () => {
 
     it("should work even if the UUID is not found", async () => {
       const { body, status } = await request(app)
-        .delete(`/expenses/f0dfab29-1f91-4868-9e6f-ca50760b04fa`)
+        .delete(`/ledgers/f0dfab29-1f91-4868-9e6f-ca50760b04fa`)
         .set("Authorization", `Bearer ${user1JWT}`);
 
       expect(status).to.equal(204);
     });
 
-    it("should delete an expense", async () => {
+    it("should delete an entry in the ledger", async () => {
       const { body, status } = await request(app)
-        .delete(`/expenses/${expense1user1.id}`)
+        .delete(`/ledgers/${ledgerEntry1user1.id}`)
         .set("Authorization", `Bearer ${user1JWT}`);
 
       expect(status).to.equal(204);
 
-      const expenseRepository = getManager().getRepository(Expense);
-      const result = await expenseRepository.findOne(expense1user1.id);
+      const ledgerRepository = getManager().getRepository(Ledger);
+      const result = await ledgerRepository.findOne(ledgerEntry1user1.id);
 
       expect(result).to.be.undefined;
     });
 
-    it("should not delete an expense of another user", async () => {
+    it("should not delete an entry of another user", async () => {
       const { body, status } = await request(app)
-        .delete(`/expenses/${expense2user2.id}`)
+        .delete(`/ledgers/${ledgerEntry2user2.id}`)
         .set("Authorization", `Bearer ${user1JWT}`);
 
       expect(status).to.equal(204);
 
-      const expenseRepository = getManager().getRepository(Expense);
-      const result = await expenseRepository.findOne(expense2user2.id);
+      const ledgerRepository = getManager().getRepository(Ledger);
+      const result = await ledgerRepository.findOne(ledgerEntry2user2.id);
 
       expect(result).to.not.be.undefined;
     });
   });
 
-  describe("[GET /expenses]", () => {
+  describe("[GET /ledgers]", () => {
     it("should fail with an invalid JWT", async () => {
-      const { body, status } = await request(app).get(`/expenses`).set("Authorization", `Bearer `);
+      const { body, status } = await request(app).get(`/ledgers`).set("Authorization", `Bearer `);
 
       expect(status).to.equal(401);
     });
 
-    it("should return expenses from an user [1]", async () => {
-      const { body, status } = await request(app).get(`/expenses`).set("Authorization", `Bearer ${user1JWT}`);
+    it("should return entries from an user [1]", async () => {
+      const { body, status } = await request(app).get(`/ledgers`).set("Authorization", `Bearer ${user1JWT}`);
 
       expect(status).to.equal(200);
       expect(body).to.have.property("records");
@@ -263,9 +320,9 @@ describe("Expense routes", () => {
       expect(body).to.have.property("offset");
     });
 
-    it("should return expenses from an user [2]", async () => {
+    it("should return entries from an user [2]", async () => {
       const { body, status } = await request(app)
-        .get(`/expenses?limit=2&offset=0`)
+        .get(`/ledgers?limit=2&offset=0`)
         .set("Authorization", `Bearer ${user3JWT}`);
 
       expect(status).to.equal(200);
@@ -279,9 +336,9 @@ describe("Expense routes", () => {
       expect(body.offset).to.equal(0);
     });
 
-    it("should return expenses from an user with limit and offset", async () => {
+    it("should return entries from an user with limit and offset", async () => {
       const { body, status } = await request(app)
-        .get(`/expenses?limit=2&offset=1`)
+        .get(`/ledgers?limit=2&offset=1`)
         .set("Authorization", `Bearer ${user3JWT}`);
 
       expect(status).to.equal(200);
@@ -295,9 +352,9 @@ describe("Expense routes", () => {
       expect(body.offset).to.equal(1);
     });
 
-    it("should return expenses from an user with order ASC", async () => {
+    it("should return entries from an user with order ASC", async () => {
       const { body, status } = await request(app)
-        .get(`/expenses?order=createdAt`)
+        .get(`/ledgers?order=createdAt`)
         .set("Authorization", `Bearer ${user3JWT}`);
 
       expect(status).to.equal(200);
@@ -306,9 +363,9 @@ describe("Expense routes", () => {
       expect(Date.parse(item1.createdAt)).to.be.lessThan(Date.parse(item2.createdAt));
     });
 
-    it("should return expenses from an user with order DESC", async () => {
+    it("should return entries from an user with order DESC", async () => {
       const { body, status } = await request(app)
-        .get(`/expenses?order=-createdAt`)
+        .get(`/ledgers?order=-createdAt`)
         .set("Authorization", `Bearer ${user3JWT}`);
 
       expect(status).to.equal(200);
@@ -317,9 +374,9 @@ describe("Expense routes", () => {
       expect(Date.parse(item1.createdAt)).to.be.greaterThan(Date.parse(item2.createdAt));
     });
 
-    it("should return expenses from an user, searching by thingId", async () => {
+    it("should return entries from an user, searching by thingId", async () => {
       const { body, status } = await request(app)
-        .get(`/expenses?thingId=${thing3user3.id}`)
+        .get(`/ledgers?thingId=${thing3user3.id}`)
         .set("Authorization", `Bearer ${user3JWT}`);
 
       expect(status).to.equal(200);
@@ -328,14 +385,15 @@ describe("Expense routes", () => {
     });
   });
 
-  describe("[POST /expenses]", () => {
+  describe("[POST /ledgers]", () => {
     it("should fail if amount is negative", async () => {
       let amount = -90.7;
       let date = "2021-05-23";
       const { body, status } = await request(app)
-        .post("/expenses")
+        .post("/ledgers")
         .send({
           amount,
+          type: LedgerEntryType.expense,
           thingId: thing1user1.id,
           date,
         })
@@ -348,9 +406,63 @@ describe("Expense routes", () => {
       let amount = 0.0;
       let date = "2021-05-23";
       const { body, status } = await request(app)
-        .post("/expenses")
+        .post("/ledgers")
         .send({
           amount,
+          type: LedgerEntryType.expense,
+          thingId: thing1user1.id,
+          date,
+        })
+        .set("Authorization", `Bearer ${user1JWT}`);
+
+      expect(status).to.equal(201);
+      expect(body).to.have.all.keys(["id", "amount", "thingId", "userId", "date", "createdAt", "updatedAt", "type"]);
+
+      expect(body.amount).to.equal(amount);
+      expect(body.thingId).to.equal(thing1user1.id);
+      expect(body.userId).to.equal(user1.id);
+      expect(body.date).to.equal(date);
+      expect(body.type).to.equal(LedgerEntryType.expense);
+    });
+
+    it("should fail without a valid JTW", async () => {
+      let amount = 90.7;
+      const { body, status } = await request(app)
+        .post("/ledgers")
+        .send({
+          amount,
+          thingId: thing1user1.id,
+          type: LedgerEntryType.expense,
+        })
+        .set("Authorization", `Bearer `);
+
+      expect(status).to.equal(401);
+    });
+
+    it("should fail trying to create an entry with a thing from another user", async () => {
+      let amount = 90.7;
+      let date = "2021-05-23";
+      const { body, status } = await request(app)
+        .post("/ledgers")
+        .send({
+          amount,
+          type: LedgerEntryType.expense,
+          thingId: thing3user3.id,
+          date,
+        })
+        .set("Authorization", `Bearer ${user1JWT}`);
+
+      expect(status).to.equal(400);
+    });
+
+    it("should create an entry (expense)", async () => {
+      let amount = 90.7;
+      let date = "2021-05-23";
+      const { body, status } = await request(app)
+        .post("/ledgers")
+        .send({
+          amount,
+          type: LedgerEntryType.expense,
           thingId: thing1user1.id,
           date,
         })
@@ -364,41 +476,14 @@ describe("Expense routes", () => {
       expect(body.date).to.equal(date);
     });
 
-    it("should fail without a valid JTW", async () => {
-      let amount = 90.7;
-      const { body, status } = await request(app)
-        .post("/expenses")
-        .send({
-          amount,
-          thingId: thing1user1.id,
-        })
-        .set("Authorization", `Bearer `);
-
-      expect(status).to.equal(401);
-    });
-
-    it("should fail trying to create an expense with a thing from another user", async () => {
+    it("should create an entry (income)", async () => {
       let amount = 90.7;
       let date = "2021-05-23";
       const { body, status } = await request(app)
-        .post("/expenses")
+        .post("/ledgers")
         .send({
           amount,
-          thingId: thing3user3.id,
-          date,
-        })
-        .set("Authorization", `Bearer ${user1JWT}`);
-
-      expect(status).to.equal(400);
-    });
-
-    it("should create an expense", async () => {
-      let amount = 90.7;
-      let date = "2021-05-23";
-      const { body, status } = await request(app)
-        .post("/expenses")
-        .send({
-          amount,
+          type: LedgerEntryType.income,
           thingId: thing1user1.id,
           date,
         })

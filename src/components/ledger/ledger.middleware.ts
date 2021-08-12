@@ -1,28 +1,27 @@
 import * as express from "express";
-import Bcrypt from "../../common/bcrypt";
 import ValidationError from "../../common/errors/validation-error";
 
 import thingsService from "../things/things.service";
 
-class ExpensesMiddleware {
-  private static instance: ExpensesMiddleware;
+class LedgerMiddleware {
+  private static instance: LedgerMiddleware;
 
   /* istanbul ignore next */
   static getInstance() {
-    if (!ExpensesMiddleware.instance) {
-      ExpensesMiddleware.instance = new ExpensesMiddleware();
+    if (!LedgerMiddleware.instance) {
+      LedgerMiddleware.instance = new LedgerMiddleware();
     }
-    return ExpensesMiddleware.instance;
+    return LedgerMiddleware.instance;
   }
 
   async thingBelongsToUser(req: express.Request, res: express.Response, next: express.NextFunction) {
     const thing = await thingsService.findById(req.body.thingId, req.user);
     if (thing === undefined) {
-      throw new ValidationError("Thing not found");
+      throw new ValidationError("Thing not found or doesn't belong to the user");
     }
 
     next();
   }
 }
 
-export default ExpensesMiddleware.getInstance();
+export default LedgerMiddleware.getInstance();

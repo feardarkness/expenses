@@ -66,7 +66,7 @@ describe("Login Routes", () => {
     if (connection) {
       await connection.query("DELETE FROM public.token_blacklist");
       await connection.query("DELETE FROM public.token_refresh");
-      await connection.query("DELETE FROM public.expense");
+      await connection.query("DELETE FROM public.ledger");
       await connection.query("DELETE FROM public.thing");
       await connection.query("DELETE FROM public.user");
       await connection.close();
@@ -126,14 +126,9 @@ describe("Login Routes", () => {
       });
 
       expect(status).to.equal(200);
-      expect(body).to.haveOwnProperty("token");
-      expect(body).to.haveOwnProperty("refreshToken");
-      expect(body).to.haveOwnProperty("user");
-
-      expect(body.user).to.haveOwnProperty("email");
-      expect(body.user).to.haveOwnProperty("id");
-      expect(body.user).to.haveOwnProperty("fullName");
-      expect(body.user).to.haveOwnProperty("age");
+      expect(body).to.have.all.keys(["token", "refreshToken", "user"]);
+      expect(body.user).to.have.all.keys(["email", "id", "fullName", "age"]);
+      expect(body).to.not.have.keys(["password"]);
     });
   });
 

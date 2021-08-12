@@ -1,12 +1,14 @@
 import { Entity, PrimaryGeneratedColumn, Column, Index, ManyToOne, JoinColumn } from "typeorm";
 import DateCommon from "../../common/date-common";
-import { thingSchema } from "../../common/validations/schemas/thing";
+import { LedgerEntryType } from "../../common/enums/LedgerEntryType";
 import { Thing } from "../things/things.entity";
 import { User } from "../users/users.entity";
-import { ExpenseDto, ExpenseWithIdDto } from "./expenses.dto";
+import { LedgerWithIdDto } from "./ledger.dto";
 
 @Entity()
-export class Expense {
+// @Index("yearIndex", { synchronize: false })  // exclude from synchronize so it is not deleted if found
+// @Index("monthIndex", { synchronize: false })
+export class Ledger {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
@@ -16,6 +18,13 @@ export class Expense {
     type: "decimal",
   })
   amount: number;
+
+  @Column({
+    type: "enum",
+    enum: LedgerEntryType,
+    nullable: false,
+  })
+  type: LedgerEntryType;
 
   @Column({ nullable: false, name: "thing_id" })
   thingId: string;
@@ -60,13 +69,16 @@ export class Expense {
   })
   updatedAt: Date;
 
-  public basicData(): ExpenseWithIdDto {
+  public basicData(): LedgerWithIdDto {
     return {
       id: this.id,
       amount: this.amount,
       thingId: this.thingId,
       userId: this.userId,
+      type: this.type,
       date: this.date,
+      createdAt: DateCommon.getIsoDate(this.createdAt),
+      updatedAt: DateCommon.getIsoDate(this.updatedAt),
     };
   }
 }

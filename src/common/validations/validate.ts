@@ -39,18 +39,26 @@ class Validate {
       const errors: string[] | undefined = [];
 
       for (const err of validate.errors as DefinedError[]) {
-        if (err.message) {
-          let errMessage = `${err.dataPath} ${err.message}`.trim();
+        console.log("err======================");
+        console.log(err);
+        console.log("======================");
+        let errMessage: string = "Error";
+        if (err.keyword === "enum") {
+          errMessage = `${err.dataPath} ${err.message}`.trim();
+          if (err.params && "allowedValues" in err.params && Array.isArray(err.params.allowedValues)) {
+            errMessage = `${errMessage} [${err.params.allowedValues.join(",")}].`;
+          }
+        } else if (err.message) {
+          errMessage = `${err.dataPath} ${err.message}`.trim();
 
           if (err.params && "additionalProperty" in err.params) {
             errMessage = `${errMessage} [${err.params.additionalProperty}]`;
           }
-          errors.push(errMessage);
-        } else {
-          console.log("err not found======================");
-          console.log(err);
-          console.log("======================");
         }
+        if (errMessage.startsWith("/")) {
+          errMessage = errMessage.substr(1);
+        }
+        errors.push(errMessage);
       }
       throw new ValidationError(`Invalid data`, errors);
     }
