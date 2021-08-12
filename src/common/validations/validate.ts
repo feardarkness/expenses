@@ -39,9 +39,6 @@ class Validate {
       const errors: string[] | undefined = [];
 
       for (const err of validate.errors as DefinedError[]) {
-        console.log("err======================");
-        console.log(err);
-        console.log("======================");
         let errMessage: string = "Error";
         if (err.keyword === "enum") {
           errMessage = `${err.dataPath} ${err.message}`.trim();

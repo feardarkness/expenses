@@ -93,6 +93,7 @@ describe("Ledger routes", () => {
     ledgerEntry1user1.type = LedgerEntryType.expense;
     ledgerEntry1user1.thing = thing1user1;
     ledgerEntry1user1.user = user1;
+    ledgerEntry1user1.date = "2017-05-20";
     await ledgerRepository.save(ledgerEntry1user1);
 
     ledgerEntry2user2 = new Ledger();
@@ -100,6 +101,7 @@ describe("Ledger routes", () => {
     ledgerEntry2user2.amount = 500.0;
     ledgerEntry2user2.thing = thing2user2;
     ledgerEntry2user2.user = user2;
+    ledgerEntry2user2.date = "2018-05-20";
     await ledgerRepository.save(ledgerEntry2user2);
 
     ledgerEntry3user1 = new Ledger();
@@ -107,6 +109,7 @@ describe("Ledger routes", () => {
     ledgerEntry3user1.amount = 90.0;
     ledgerEntry3user1.thing = thing1user1;
     ledgerEntry3user1.user = user1;
+    ledgerEntry3user1.date = "2020-05-20";
     await ledgerRepository.save(ledgerEntry3user1);
 
     ledgerEntry4user3 = new Ledger();
@@ -114,6 +117,7 @@ describe("Ledger routes", () => {
     ledgerEntry4user3.amount = 90.0;
     ledgerEntry4user3.thing = thing3user3;
     ledgerEntry4user3.user = user3;
+    ledgerEntry4user3.date = "2019-05-19";
     await ledgerRepository.save(ledgerEntry4user3);
 
     ledgerEntry5user3 = new Ledger();
@@ -121,6 +125,7 @@ describe("Ledger routes", () => {
     ledgerEntry5user3.amount = 100.0;
     ledgerEntry5user3.thing = thing3user3;
     ledgerEntry5user3.user = user3;
+    ledgerEntry5user3.date = "2020-05-20";
     await ledgerRepository.save(ledgerEntry5user3);
   });
 
@@ -350,6 +355,54 @@ describe("Ledger routes", () => {
       expect(body.limit).to.equal(2);
       expect(body).to.have.property("offset");
       expect(body.offset).to.equal(1);
+    });
+
+    it("should return entries from an user filtering by minDate", async () => {
+      const dateToFilter = "2020-05-20";
+      const { body, status } = await request(app)
+        .get(`/ledgers?minDate=${dateToFilter}`)
+        .set("Authorization", `Bearer ${user3JWT}`);
+
+      expect(status).to.equal(200);
+
+      expect(body).to.have.all.keys(["records", "total", "limit", "offset"]);
+      expect(body.records).to.have.length(1);
+
+      body.records.forEach((record) =>
+        expect(Date.parse(record.date)).to.be.greaterThanOrEqual(Date.parse(dateToFilter))
+      );
+    });
+
+    it("should return entries from an user filtering by maxDate", async () => {
+      const dateToFilter = "2019-05-19";
+      const { body, status } = await request(app)
+        .get(`/ledgers?maxDate=${dateToFilter}`)
+        .set("Authorization", `Bearer ${user3JWT}`);
+
+      expect(status).to.equal(200);
+
+      expect(body).to.have.all.keys(["records", "total", "limit", "offset"]);
+      expect(body.records).to.have.length(1);
+
+      body.records.forEach((record) => expect(Date.parse(record.date)).to.be.lessThanOrEqual(Date.parse(dateToFilter)));
+    });
+
+    it("should return entries from an user filtering by minDate and maxDate", async () => {
+      const maxDateToFilter = "2020-05-20";
+      const minDateToFilter = "2019-05-19";
+      const { body, status } = await request(app)
+        .get(`/ledgers?maxDate=${maxDateToFilter}&minDate=${minDateToFilter}`)
+        .set("Authorization", `Bearer ${user3JWT}`);
+
+      expect(status).to.equal(200);
+
+      expect(body).to.have.all.keys(["records", "total", "limit", "offset"]);
+      expect(body.records).to.have.length(2);
+
+      body.records.forEach((record) => {
+        expect(Date.parse(record.date)).to.be.lessThanOrEqual(Date.parse(maxDateToFilter));
+        expect(Date.parse(record.date)).to.be.greaterThanOrEqual(Date.parse(minDateToFilter));
+      });
     });
 
     it("should return entries from an user with order ASC", async () => {

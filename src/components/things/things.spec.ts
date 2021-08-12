@@ -121,7 +121,7 @@ describe("Thing routes", () => {
       expect(status).to.equal(400);
       expect(body).to.deep.equal({
         error: "Invalid data",
-        detail: ["/name should NOT have fewer than 3 characters"],
+        detail: ["name should NOT have fewer than 3 characters"],
       });
     });
 
