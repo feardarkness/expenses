@@ -1,4 +1,4 @@
-export enum ReportType {
+export enum LedgerInterval {
   monthly = "Monthly",
   yearly = "Yearly",
   weekly = "Weekly",

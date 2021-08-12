@@ -1,7 +1,7 @@
 import { JSONSchemaType } from "ajv";
 import { UserDto } from "../../../components/users/users.dto";
 import { LedgerEntryType } from "../../enums/LedgerEntryType";
-import { ReportType } from "../../enums/ReportType";
+import { LedgerInterval } from "../../enums/LedgerInterval";
 
 const createUserSchema: JSONSchemaType<UserDto> = {
   type: "object",
@@ -94,26 +94,25 @@ const activationTokenForUserSchema: JSONSchemaType<GenerateActivationTokenQuery>
 };
 
 interface ReportQuery {
-  periodicity: string;
+  interval: string;
   groupBy?: string[];
   things?: string[];
+  type?: LedgerEntryType[];
 }
-
-console.log();
 
 const reportQuerySchema: JSONSchemaType<ReportQuery> = {
   type: "object",
   properties: {
-    periodicity: {
+    interval: {
       type: "string",
-      enum: Object.keys(ReportType),
+      enum: Object.values(LedgerInterval),
     },
     groupBy: {
       type: "array",
       nullable: true,
       items: {
         type: "string",
-        enum: ["thing"].concat(Object.keys(LedgerEntryType)),
+        enum: ["thing"].concat(Object.values(LedgerEntryType)),
       },
     },
     things: {
@@ -125,8 +124,16 @@ const reportQuerySchema: JSONSchemaType<ReportQuery> = {
         maxLength: 36,
       },
     },
+    type: {
+      type: "array",
+      nullable: true,
+      items: {
+        type: "string",
+        enum: Object.values(LedgerEntryType),
+      },
+    },
   },
-  required: ["periodicity"],
+  required: ["interval"],
   additionalProperties: false,
 };
 

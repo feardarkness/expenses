@@ -55,7 +55,10 @@ export default class ListQueryBuilder {
     return parseInt(offset);
   }
 
-  static buildQuery(queryParams: LedgerListParamsInterface, fieldToOrderByDefault: string = "updatedAt") {
+  static buildQuery(
+    queryParams: LedgerListParamsInterface,
+    fieldToOrderByDefault: string = "updatedAt"
+  ): { take: number; skip: number; order: any; where: any } {
     const limit = this.buildLimitQuery(queryParams.limit);
 
     const offset = this.buildOffsetQuery(queryParams.offset);

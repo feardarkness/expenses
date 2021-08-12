@@ -1,5 +1,5 @@
 import { CRUD } from "../../common/interfaces/crud";
-import { getManager } from "typeorm";
+import { Between, getManager, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
 import { CommonServicesConfig } from "../../common/common.services.config";
 import debug from "debug";
 import { Ledger } from "./ledger.entity";
@@ -34,7 +34,7 @@ class LedgerService extends CommonServicesConfig implements CRUD {
     ledger.thing = thing;
 
     ledger.user = user;
-
+    ledger.type = resource.type;
     ledger.date = (DateCommon.parseDateFromString(resource.date) as unknown) as string;
 
     return ledgerRepository.save(ledger);
@@ -77,8 +77,28 @@ class LedgerService extends CommonServicesConfig implements CRUD {
 
   async list(queryParams: LedgerListParamsInterface, user: User) {
     const ledgerRepository = getManager().getRepository(Ledger);
+
     const query = ListQueryBuilder.buildQuery(queryParams);
     query.where["userId"] = user.id;
+
+    if ("minDate" in query.where && "maxDate" in query.where) {
+      const minDate = query.where.minDate;
+      delete query.where.minDate;
+      const maxDate = query.where.maxDate;
+      delete query.where.maxDate;
+      query.where.date = Between(minDate, maxDate);
+    } else {
+      if ("minDate" in query.where) {
+        const minDate = query.where.minDate;
+        delete query.where.minDate;
+        query.where.date = MoreThanOrEqual(minDate);
+      }
+      if ("maxDate" in query.where) {
+        const maxDate = query.where.maxDate;
+        delete query.where.maxDate;
+        query.where.date = LessThanOrEqual(maxDate);
+      }
+    }
 
     const [entries, total] = await Promise.all([
       ledgerRepository.find(query),

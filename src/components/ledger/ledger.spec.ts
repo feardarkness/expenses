@@ -12,6 +12,7 @@ import loginService from "../auth/login.service";
 import { UserType } from "../../common/enums/UserType";
 import { Thing } from "../things/things.entity";
 import { Ledger } from "./ledger.entity";
+import { LedgerEntryType } from "../../common/enums/LedgerEntryType";
 
 let expect = chai.expect;
 chai.use(sinonChai);
@@ -89,29 +90,34 @@ describe("Ledger routes", () => {
 
     ledgerEntry1user1 = new Ledger();
     ledgerEntry1user1.amount = 50.0;
+    ledgerEntry1user1.type = LedgerEntryType.expense;
     ledgerEntry1user1.thing = thing1user1;
     ledgerEntry1user1.user = user1;
     await ledgerRepository.save(ledgerEntry1user1);
 
     ledgerEntry2user2 = new Ledger();
+    ledgerEntry2user2.type = LedgerEntryType.expense;
     ledgerEntry2user2.amount = 500.0;
     ledgerEntry2user2.thing = thing2user2;
     ledgerEntry2user2.user = user2;
     await ledgerRepository.save(ledgerEntry2user2);
 
     ledgerEntry3user1 = new Ledger();
+    ledgerEntry3user1.type = LedgerEntryType.income;
     ledgerEntry3user1.amount = 90.0;
     ledgerEntry3user1.thing = thing1user1;
     ledgerEntry3user1.user = user1;
     await ledgerRepository.save(ledgerEntry3user1);
 
     ledgerEntry4user3 = new Ledger();
+    ledgerEntry4user3.type = LedgerEntryType.income;
     ledgerEntry4user3.amount = 90.0;
     ledgerEntry4user3.thing = thing3user3;
     ledgerEntry4user3.user = user3;
     await ledgerRepository.save(ledgerEntry4user3);
 
     ledgerEntry5user3 = new Ledger();
+    ledgerEntry5user3.type = LedgerEntryType.expense;
     ledgerEntry5user3.amount = 100.0;
     ledgerEntry5user3.thing = thing3user3;
     ledgerEntry5user3.user = user3;
@@ -170,11 +176,31 @@ describe("Ledger routes", () => {
         .put(`/ledgers/${ledgerEntry3user1.id}`)
         .send({
           amount: 1234.8,
+          thingId: thing1user1.id,
+          type: LedgerEntryType.expense,
           date: "2021-02-25",
         })
         .set("Authorization", `Bearer `);
 
       expect(status).to.equal(401);
+    });
+
+    it("should fail if no type is sent", async () => {
+      const { body, status } = await request(app)
+        .put(`/ledgers/${ledgerEntry2user2.id}`)
+        .send({
+          amount: 1234.8,
+          thingId: thing1user1.id,
+          date: "2021-02-25",
+        })
+        .set("Authorization", `Bearer ${user1JWT}`);
+
+      expect(status).to.equal(400);
+
+      expect(body).to.deep.equal({
+        error: "Invalid data",
+        detail: ["should have required property 'type'"],
+      });
     });
 
     it("should fail if the entryId belongs to another user", async () => {
@@ -183,6 +209,7 @@ describe("Ledger routes", () => {
         .send({
           amount: 1234.8,
           thingId: thing1user1.id,
+          type: LedgerEntryType.expense,
           date: "2021-02-25",
         })
         .set("Authorization", `Bearer ${user1JWT}`);
@@ -200,6 +227,7 @@ describe("Ledger routes", () => {
         .send({
           amount: 1234.8,
           thingId: thing2user2.id,
+          type: LedgerEntryType.expense,
           date: "2021-02-25",
         })
         .set("Authorization", `Bearer ${user1JWT}`);
@@ -214,9 +242,15 @@ describe("Ledger routes", () => {
         .send({
           amount: 444555.8,
           thingId: thing1user1.id,
+          type: LedgerEntryType.income,
           date: "2021-02-25",
         })
         .set("Authorization", `Bearer ${user1JWT}`);
+
+      const ledgerRepository = getManager().getRepository(Ledger);
+      const ledger = await ledgerRepository.find({
+        id: ledgerEntry3user1.id,
+      });
 
       expect(status).to.equal(200);
       expect(body).to.deep.equal({
@@ -359,6 +393,7 @@ describe("Ledger routes", () => {
         .post("/ledgers")
         .send({
           amount,
+          type: LedgerEntryType.expense,
           thingId: thing1user1.id,
           date,
         })
@@ -374,18 +409,20 @@ describe("Ledger routes", () => {
         .post("/ledgers")
         .send({
           amount,
+          type: LedgerEntryType.expense,
           thingId: thing1user1.id,
           date,
         })
         .set("Authorization", `Bearer ${user1JWT}`);
 
       expect(status).to.equal(201);
-      expect(body).to.have.all.keys(["id", "amount", "thingId", "userId", "date", "createdAt", "updatedAt"]);
+      expect(body).to.have.all.keys(["id", "amount", "thingId", "userId", "date", "createdAt", "updatedAt", "type"]);
 
       expect(body.amount).to.equal(amount);
       expect(body.thingId).to.equal(thing1user1.id);
       expect(body.userId).to.equal(user1.id);
       expect(body.date).to.equal(date);
+      expect(body.type).to.equal(LedgerEntryType.expense);
     });
 
     it("should fail without a valid JTW", async () => {
@@ -395,6 +432,7 @@ describe("Ledger routes", () => {
         .send({
           amount,
           thingId: thing1user1.id,
+          type: LedgerEntryType.expense,
         })
         .set("Authorization", `Bearer `);
 
@@ -408,6 +446,7 @@ describe("Ledger routes", () => {
         .post("/ledgers")
         .send({
           amount,
+          type: LedgerEntryType.expense,
           thingId: thing3user3.id,
           date,
         })
@@ -416,13 +455,35 @@ describe("Ledger routes", () => {
       expect(status).to.equal(400);
     });
 
-    it("should create an entry", async () => {
+    it("should create an entry (expense)", async () => {
       let amount = 90.7;
       let date = "2021-05-23";
       const { body, status } = await request(app)
         .post("/ledgers")
         .send({
           amount,
+          type: LedgerEntryType.expense,
+          thingId: thing1user1.id,
+          date,
+        })
+        .set("Authorization", `Bearer ${user1JWT}`);
+
+      expect(status).to.equal(201);
+
+      expect(body.amount).to.equal(amount);
+      expect(body.thingId).to.equal(thing1user1.id);
+      expect(body.userId).to.equal(user1.id);
+      expect(body.date).to.equal(date);
+    });
+
+    it("should create an entry (income)", async () => {
+      let amount = 90.7;
+      let date = "2021-05-23";
+      const { body, status } = await request(app)
+        .post("/ledgers")
+        .send({
+          amount,
+          type: LedgerEntryType.income,
           thingId: thing1user1.id,
           date,
         })
