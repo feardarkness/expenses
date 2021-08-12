@@ -413,37 +413,52 @@ paths:
 
         userId is required only with an ADMIN account.
       parameters:
-        - schema:
-            type: number
-            example: 50
-            maxLength: 4
-            minimum: 1
-            maximum: 100
-          in: query
-          name: limit
-          description: Limit the number of records returned
-        - schema:
-            type: number
-            minimum: 0
-            example: 120
-          in: query
-          name: offset
-          description: Number of records to be skipped
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
         - schema:
             type: string
             default: '-updatedAt'
             enum:
-              - updatedAt
-              - '-updatedAt'
+              - '"date"'
+              - '"amount"'
+              - '"createdAt"'
+              - '"updatedAt"'
+              - '"-date"'
+              - '"-amount"'
+              - '"-createdAt"'
+              - '"-updatedAt"'
           in: query
           name: order
           description: The results will be ordered by this field
         - schema:
             type: string
             example: e8a25b46-aa52-4909-871f-9cd1b5f2d931
+            minLength: 36
+            maxLength: 36
           in: query
-          name: userId
-          description: It will return records associated to this user. This field is used only with an ADMIN user.
+          name: thingId
+          description: It will return records associated with this thing
+        - schema:
+            type: string
+            example: Income
+            enum:
+              - Income
+              - Expense
+          in: query
+          name: type
+          description: 'By default it will return all types of entries (Expense, Income). Use this field to return only one type of entry.'
+        - schema:
+            type: string
+            pattern: '2021-01-01'
+            format: date
+          in: query
+          name: minDate
+          description: It will return the records with a date greater than or equal to this date.
+        - schema:
+            type: string
+          in: query
+          name: maxDate
+          description: It will return the records with a date lower than or equal to this date.
     post:
       summary: Create a Thing
       tags:
@@ -579,6 +594,10 @@ paths:
           in: query
           name: order
           description: The results will be ordered by this field
+        - schema:
+            type: string
+          in: query
+          name: qwewqewq
       security:
         - UserBearerAuthorization: []
     parameters: []
@@ -947,6 +966,25 @@ components:
       type: apiKey
       in: header
   responses: {}
+  parameters:
+    limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: number
+        default: '100'
+        minimum: 1
+        maximum: 100
+      description: Limit the number of records returned
+    offset:
+      name: offset
+      in: query
+      required: false
+      schema:
+        type: number
+        minimum: 0
+      description: Number of records to be skipped
 tags:
   - name: Ledger
   - name: Login/Logout
