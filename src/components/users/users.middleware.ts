@@ -4,6 +4,8 @@ import ValidationError from "../../common/errors/validation-error";
 import ForbiddenError from "../../common/errors/forbidden-error";
 import { UserStatus } from "../../common/enums/UserStatus";
 import usersService from "./users.service";
+import isBefore from "date-fns/isBefore";
+import DateCommon from "../../common/date-common";
 
 class UserMiddleware {
   private static instance: UserMiddleware;
@@ -53,6 +55,18 @@ class UserMiddleware {
   async validateUserAllowedByToken(req: express.Request, res: express.Response, next: express.NextFunction) {
     if (req.params.userId !== req.user.id) {
       throw new ForbiddenError("Forbidden");
+    }
+    next();
+  }
+
+  validateReportQueryDates(req: express.Request, res: express.Response, next: express.NextFunction) {
+    if (
+      !DateCommon.isDateBefore(
+        DateCommon.parseDateFromString(req.query.minDate as string),
+        DateCommon.parseDateFromString(req.query.maxDate as string)
+      )
+    ) {
+      throw new ValidationError("maxDate should be greater than minDate");
     }
     next();
   }

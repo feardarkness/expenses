@@ -39,11 +39,11 @@ export class UserRoutes extends CommonRoutesConfig {
         `/:userId/reports`,
         asyncWrapper(authMiddleware.validateToken()),
         asyncWrapper(authMiddleware.userTypeAllowed([UserType.user])),
-        asyncWrapper(validateMiddleware.validateData("reportQuerySchema", "query")),
         asyncWrapper(validateMiddleware.validateUuidInPath("userId")),
-        asyncWrapper(userMiddleware.validateUserAllowedByToken)
+        asyncWrapper(userMiddleware.validateUserAllowedByToken),
+        asyncWrapper(validateMiddleware.validateData("reportQuerySchema", "query"))
       )
-      .get(`/:userId/reports`, userController.generateReport);
+      .get(`/:userId/reports`, asyncWrapper(userController.generateReport));
 
     this.router
       .all(

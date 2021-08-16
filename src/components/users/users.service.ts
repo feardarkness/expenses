@@ -1,5 +1,5 @@
 import { CRUD } from "../../common/interfaces/crud";
-import { UserDto } from "./users.dto";
+import { ReportQuery, UserDto } from "./users.dto";
 import { User } from "./users.entity";
 import { EntityManager, getManager } from "typeorm";
 import { CommonServicesConfig } from "../../common/common.services.config";
@@ -15,6 +15,10 @@ import RandomString from "../../common/random-string";
 import { TokenType } from "../../common/enums/TokenType";
 import { TokenDto } from "../tokens/tokens.dto";
 import mailsService from "../mails/mails.service";
+import { LedgerQueryInterval } from "../../common/enums/LedgerQueryInterval";
+import { LedgerEntryType } from "../../common/enums/LedgerEntryType";
+import { Ledger } from "../ledger/ledger.entity";
+import { LedgerQueryGroupBy } from "../../common/enums/LedgerQueryGroupBy";
 
 const debugInstance: debug.IDebugger = debug("app:user-service");
 
@@ -52,7 +56,9 @@ class UserService extends CommonServicesConfig implements CRUD {
   async findById(userId: string) {
     const userRepository = getManager().getRepository(User);
 
-    return userRepository.findOne(userId);
+    return userRepository.findOne({
+      id: userId,
+    });
   }
 
   /* istanbul ignore next */
@@ -112,6 +118,60 @@ class UserService extends CommonServicesConfig implements CRUD {
     });
 
     await mailsService.sendActivationEmail(userActivateToken, user.email);
+  }
+
+  async generateReport(query: ReportQuery, user: User) {
+    const interval = query.interval || LedgerQueryInterval.monthly;
+    const groupBy = query.groupBy || [LedgerQueryGroupBy.entryType];
+
+    const additionalGroupByFields: string[] = [];
+    const additionalSelectFields: string[] = [];
+
+    if (groupBy.includes(LedgerQueryGroupBy.entryType)) {
+      additionalSelectFields.push(`type`);
+      additionalGroupByFields.push(`type`);
+    }
+    if (groupBy.includes(LedgerQueryGroupBy.thing)) {
+      additionalSelectFields.push(`thing_id as "thingId"`);
+      additionalGroupByFields.push(`"thingId"`);
+    }
+
+    const queryBuilder = getManager().getRepository(Ledger).createQueryBuilder("ledger");
+    if (interval === LedgerQueryInterval.daily) {
+      queryBuilder.select(['date as "groupedDate"', "sum(amount) as total"]);
+    } else {
+      let trunc = "week";
+      if (interval === LedgerQueryInterval.monthly) {
+        trunc = "month";
+      } else if (interval === LedgerQueryInterval.yearly) {
+        trunc = "year";
+      }
+      queryBuilder.select([`date_trunc('${trunc}', date) as "groupedDate"`, `sum(amount) as total`]);
+    }
+
+    if (additionalSelectFields.length > 0) {
+      queryBuilder.addSelect(additionalSelectFields);
+    }
+
+    queryBuilder.where(`ledger.userId = :userId and ledger.date <= :maxDate and ledger.date >= :minDate`, {
+      userId: user.id,
+      minDate: query.minDate,
+      maxDate: query.maxDate,
+    });
+
+    queryBuilder.groupBy('"groupedDate"');
+    if (additionalGroupByFields.length > 0) {
+      additionalGroupByFields.forEach((field) => {
+        queryBuilder.addGroupBy(field);
+      });
+    }
+
+    queryBuilder.orderBy('"groupedDate"', "DESC");
+    if (additionalGroupByFields.length > 0) {
+      additionalGroupByFields.forEach((field) => queryBuilder.addOrderBy(field, "DESC"));
+    }
+
+    return queryBuilder.getRawMany();
   }
 }
 

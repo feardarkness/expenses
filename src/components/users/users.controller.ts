@@ -11,6 +11,7 @@ import { TokenDto } from "../tokens/tokens.dto";
 import { getManager } from "typeorm";
 import { TokenType } from "../../common/enums/TokenType";
 import { UserStatus } from "../../common/enums/UserStatus";
+import { ReportQuery } from "./users.dto";
 
 const debugInstance: debug.IDebugger = debug("app:user-controller");
 
@@ -100,10 +101,12 @@ export class UserController {
   }
 
   async generateReport(req: express.Request, res: express.Response) {
-    const data = {
-      a: 1,
-    };
-    res.status(200).json(data);
+    log.trace(`[generateReport]`, { query: req.query });
+    const reportResults = await userService.generateReport((req.query as unknown) as ReportQuery, req.user);
+
+    res.status(200).json({
+      data: reportResults,
+    });
   }
 }
 

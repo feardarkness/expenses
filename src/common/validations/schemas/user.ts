@@ -1,7 +1,8 @@
 import { JSONSchemaType } from "ajv";
-import { UserDto } from "../../../components/users/users.dto";
+import { ReportQuery, UserDto } from "../../../components/users/users.dto";
 import { LedgerEntryType } from "../../enums/LedgerEntryType";
-import { LedgerInterval } from "../../enums/LedgerInterval";
+import { LedgerQueryGroupBy } from "../../enums/LedgerQueryGroupBy";
+import { LedgerQueryInterval } from "../../enums/LedgerQueryInterval";
 
 const createUserSchema: JSONSchemaType<UserDto> = {
   type: "object",
@@ -93,47 +94,33 @@ const activationTokenForUserSchema: JSONSchemaType<GenerateActivationTokenQuery>
   additionalProperties: false,
 };
 
-interface ReportQuery {
-  interval: string;
-  groupBy?: string[];
-  things?: string[];
-  type?: LedgerEntryType[];
-}
-
 const reportQuerySchema: JSONSchemaType<ReportQuery> = {
   type: "object",
   properties: {
     interval: {
       type: "string",
-      enum: Object.values(LedgerInterval),
+      enum: Object.values(LedgerQueryInterval),
     },
     groupBy: {
       type: "array",
       nullable: true,
+      default: [LedgerQueryGroupBy.entryType],
+      uniqueItems: true,
       items: {
         type: "string",
-        enum: ["thing"].concat(Object.values(LedgerEntryType)),
+        enum: Object.values(LedgerQueryGroupBy),
       },
     },
-    things: {
-      type: "array",
-      nullable: true,
-      items: {
-        type: "string",
-        minLength: 36,
-        maxLength: 36,
-      },
+    minDate: {
+      type: "string",
+      format: "date",
     },
-    type: {
-      type: "array",
-      nullable: true,
-      items: {
-        type: "string",
-        enum: Object.values(LedgerEntryType),
-      },
+    maxDate: {
+      type: "string",
+      format: "date",
     },
   },
-  required: ["interval"],
+  required: ["interval", "minDate", "maxDate"],
   additionalProperties: false,
 };
 

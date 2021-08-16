@@ -1,4 +1,4 @@
-export enum LedgerInterval {
+export enum LedgerQueryInterval {
   monthly = "Monthly",
   yearly = "Yearly",
   weekly = "Weekly",

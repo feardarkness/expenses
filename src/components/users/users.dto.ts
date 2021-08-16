@@ -11,3 +11,10 @@ export interface UserBasicDto {
   age?: number;
   email: string;
 }
+
+export interface ReportQuery {
+  interval: string;
+  groupBy?: string[];
+  minDate: string;
+  maxDate: string;
+}

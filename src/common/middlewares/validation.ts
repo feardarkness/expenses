@@ -1,5 +1,5 @@
 import express from "express";
-import ValidationError from "../errors/validation-error";
+import NotFoundError from "../errors/not-found-error";
 import commonValidators from "../validations/common-validators";
 import validate from "../validations/validate";
 
@@ -25,7 +25,7 @@ class ValidateMiddleware {
     return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
       const isValid = commonValidators.isUUID(req.params[propertyName]);
       if (!isValid) {
-        throw new ValidationError("The identifier should be an UUID");
+        throw new NotFoundError("User not found. The identifier should be an UUID");
       }
       next();
     };

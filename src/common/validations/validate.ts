@@ -1,8 +1,8 @@
 import Ajv, { DefinedError } from "ajv";
+import log from "../logger";
 import Schemas from "./schemas/index";
 import ValidationError from "../errors/validation-error";
 import addFormats from "ajv-formats";
-import log from "../logger";
 import ajvKeywords from "ajv-keywords";
 
 class Validate {
@@ -40,13 +40,16 @@ class Validate {
 
       for (const err of validate.errors as DefinedError[]) {
         let errMessage: string = "Error";
+        // TODO remove, this is logged already
+        log.error("Validation error", { err });
+
         if (err.keyword === "enum") {
-          errMessage = `${err.dataPath} ${err.message}`.trim();
+          errMessage = `${err.instancePath} ${err.message}`.trim();
           if (err.params && "allowedValues" in err.params && Array.isArray(err.params.allowedValues)) {
             errMessage = `${errMessage} [${err.params.allowedValues.join(",")}].`;
           }
         } else if (err.message) {
-          errMessage = `${err.dataPath} ${err.message}`.trim();
+          errMessage = `${err.instancePath} ${err.message}`.trim();
 
           if (err.params && "additionalProperty" in err.params) {
             errMessage = `${errMessage} [${err.params.additionalProperty}]`;

@@ -151,10 +151,9 @@ describe("User routes", () => {
         .get(`/users/not-valid-uuid`)
         .set("Authorization", `Bearer ${newUserActiveJWT}`);
 
-      expect(status).to.equal(400, "Status 400 should be returned if something is wrong");
+      expect(status).to.equal(404, "Status 404 should be returned if something is wrong");
       expect(body).to.deep.equal({
-        error: "The identifier should be an UUID",
-        detail: [],
+        error: "User not found. The identifier should be an UUID",
       });
     });
 
