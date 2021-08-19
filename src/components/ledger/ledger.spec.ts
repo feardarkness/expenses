@@ -204,7 +204,7 @@ describe("Ledger routes", () => {
 
       expect(body).to.deep.equal({
         error: "Invalid data",
-        detail: ["should have required property 'type'"],
+        detail: ["must have required property 'type'"],
       });
     });
 
@@ -439,8 +439,24 @@ describe("Ledger routes", () => {
   });
 
   describe("[POST /ledgers]", () => {
-    it("should fail if amount is negative", async () => {
+    it("should fail if amount is negative and is an Income", async () => {
       let amount = -90.7;
+      let date = "2021-05-23";
+      const { body, status } = await request(app)
+        .post("/ledgers")
+        .send({
+          amount,
+          type: LedgerEntryType.income,
+          thingId: thing1user1.id,
+          date,
+        })
+        .set("Authorization", `Bearer ${user1JWT}`);
+
+      expect(status).to.equal(400);
+    });
+
+    it("should fail if amount is positive and is an Expense", async () => {
+      let amount = 90.7;
       let date = "2021-05-23";
       const { body, status } = await request(app)
         .post("/ledgers")
@@ -509,7 +525,7 @@ describe("Ledger routes", () => {
     });
 
     it("should create an entry (expense)", async () => {
-      let amount = 90.7;
+      let amount = -90.7;
       let date = "2021-05-23";
       const { body, status } = await request(app)
         .post("/ledgers")

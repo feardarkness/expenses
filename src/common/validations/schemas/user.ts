@@ -100,6 +100,7 @@ const reportQuerySchema: JSONSchemaType<ReportQuery> = {
     interval: {
       type: "string",
       enum: Object.values(LedgerQueryInterval),
+      default: LedgerQueryInterval.daily,
     },
     groupBy: {
       type: "array",

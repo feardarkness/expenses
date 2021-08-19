@@ -19,6 +19,9 @@ import { LedgerQueryInterval } from "../../common/enums/LedgerQueryInterval";
 import { LedgerEntryType } from "../../common/enums/LedgerEntryType";
 import { Ledger } from "../ledger/ledger.entity";
 import { LedgerQueryGroupBy } from "../../common/enums/LedgerQueryGroupBy";
+import { crossOriginOpenerPolicy } from "helmet";
+import ReportsHelper from "../../common/reports-helper";
+import SanitizeSql from "../../common/sanitize-sql";
 
 const debugInstance: debug.IDebugger = debug("app:user-service");
 
@@ -121,57 +124,66 @@ class UserService extends CommonServicesConfig implements CRUD {
   }
 
   async generateReport(query: ReportQuery, user: User) {
-    const interval = query.interval || LedgerQueryInterval.monthly;
-    const groupBy = query.groupBy || [LedgerQueryGroupBy.entryType];
+    const interval = (query.interval || LedgerQueryInterval.monthly) as LedgerQueryInterval;
+    const groupBy = (query.groupBy || [LedgerQueryGroupBy.entryType]) as LedgerQueryGroupBy[];
 
-    const additionalGroupByFields: string[] = [];
-    const additionalSelectFields: string[] = [];
-
+    let subQueryAdditionalSelect = "";
+    let subQueryAdditionalJoin = "";
+    let querySelect = "";
+    let mainQuerySelect = "";
+    let queryGroupBy = "";
+    let queryOrderBy = "";
     if (groupBy.includes(LedgerQueryGroupBy.entryType)) {
-      additionalSelectFields.push(`type`);
-      additionalGroupByFields.push(`type`);
+      subQueryAdditionalSelect += `, "type"`;
+      querySelect += `,"type"::text`;
+      mainQuerySelect += `,"type"::text`;
+      subQueryAdditionalJoin += `, (VALUES ('Income'), ('Expense')) as x("type")`;
+      queryGroupBy += `,"type"`;
+      queryOrderBy += `,"type" DESC`;
     }
     if (groupBy.includes(LedgerQueryGroupBy.thing)) {
-      additionalSelectFields.push(`thing_id as "thingId"`);
-      additionalGroupByFields.push(`"thingId"`);
+      subQueryAdditionalSelect += `, id as thing_id`;
+      subQueryAdditionalJoin += `, (SELECT id FROM public.thing where user_id=$1) thing_id`;
+      querySelect += `,thing_id`;
+      mainQuerySelect += `,thing_id as "thingId"`;
+      queryGroupBy += `,thing_id`;
+      queryOrderBy += `,thing_id DESC`;
     }
 
-    const queryBuilder = getManager().getRepository(Ledger).createQueryBuilder("ledger");
-    if (interval === LedgerQueryInterval.daily) {
-      queryBuilder.select(['date as "groupedDate"', "sum(amount) as total"]);
-    } else {
-      let trunc = "week";
-      if (interval === LedgerQueryInterval.monthly) {
-        trunc = "month";
-      } else if (interval === LedgerQueryInterval.yearly) {
-        trunc = "year";
-      }
-      queryBuilder.select([`date_trunc('${trunc}', date) as "groupedDate"`, `sum(amount) as total`]);
-    }
+    const queryInterval = ReportsHelper.correctReportIntervalName(interval);
 
-    if (additionalSelectFields.length > 0) {
-      queryBuilder.addSelect(additionalSelectFields);
-    }
+    const allDatesSubQuery = `
+      SELECT truncatedDate::date${subQueryAdditionalSelect}
+      FROM generate_series(date_trunc('${queryInterval}', ${SanitizeSql.escapeLiteralString(
+      query.minDate + "T00:00:00"
+    )}::date)::timestamp,
+                           date_trunc('${queryInterval}', ${SanitizeSql.escapeLiteralString(
+      query.maxDate + "T00:00:00"
+    )}::date)::timestamp,
+                           interval  '1 ${queryInterval}') truncatedDate${subQueryAdditionalJoin}
+    `;
 
-    queryBuilder.where(`ledger.userId = :userId and ledger.date <= :maxDate and ledger.date >= :minDate`, {
-      userId: user.id,
-      minDate: query.minDate,
-      maxDate: query.maxDate,
-    });
+    const fullQuery = `
+      SELECT truncatedDate as "groupedDate", coalesce(total, 0) as total${mainQuerySelect}
+      FROM (${allDatesSubQuery}) e
+      LEFT JOIN(
+          SELECT ${
+            interval === LedgerQueryInterval.daily ? "date" : `date_trunc('${queryInterval}', date)`
+          } as truncatedDate, sum(amount) as total${querySelect}
+          FROM public.ledger as ledger
+          WHERE user_id = $1
+              AND date >= $2
+              AND date <= $3
+          GROUP BY truncatedDate${queryGroupBy}
+      ) t USING(truncatedDate${queryGroupBy})
+      ORDER BY truncatedDate DESC${queryOrderBy}
+    `;
 
-    queryBuilder.groupBy('"groupedDate"');
-    if (additionalGroupByFields.length > 0) {
-      additionalGroupByFields.forEach((field) => {
-        queryBuilder.addGroupBy(field);
-      });
-    }
-
-    queryBuilder.orderBy('"groupedDate"', "DESC");
-    if (additionalGroupByFields.length > 0) {
-      additionalGroupByFields.forEach((field) => queryBuilder.addOrderBy(field, "DESC"));
-    }
-
-    return queryBuilder.getRawMany();
+    return getManager().query(fullQuery, [
+      user.id,
+      SanitizeSql.escapeLiteralString(query.minDate),
+      SanitizeSql.escapeLiteralString(query.maxDate),
+    ]);
   }
 }
 

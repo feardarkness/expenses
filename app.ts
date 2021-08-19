@@ -7,6 +7,8 @@ import configs from "./src/configs/index";
 import logger from "./src/common/logger";
 import morgan from "morgan";
 
+import NotFoundError from "./src/common/errors/not-found-error";
+
 import { CommonRoutesConfig } from "./src/common/common.routes.config";
 import { ErrorInterface } from "./src/common/interfaces/error-interface";
 import { UserRoutes } from "./src/components/users/users.routes";
@@ -14,6 +16,7 @@ import { LoginRoutes } from "./src/components/auth/login.routes";
 import { LogoutRoutes } from "./src/components/auth/logout.routes";
 import { ThingRoutes } from "./src/components/things/things.routes";
 import { LedgerRoutes } from "./src/components/ledger/ledger.routes";
+import log from "./src/common/logger";
 
 const app: express.Application = express();
 
@@ -44,6 +47,11 @@ app.get("/", (req: express.Request, res: express.Response) => {
   res.status(200).send({
     message: "The application is running",
   });
+});
+
+app.use("*", (req: express.Request, res: express.Response) => {
+  log.error("Trying to access a wrong url", { url: req.originalUrl });
+  throw new NotFoundError("Resource not found");
 });
 
 // error handler

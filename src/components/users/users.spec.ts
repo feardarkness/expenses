@@ -225,7 +225,7 @@ describe("User routes", () => {
       expect(status).to.equal(400);
       expect(body).to.deep.equal({
         error: "Invalid data",
-        detail: ["should NOT have additional properties [email]"],
+        detail: ["must NOT have additional properties [email]"],
       });
     });
 
@@ -368,7 +368,7 @@ describe("User routes", () => {
 
       expect(body).to.deep.equal({
         error: "Invalid data",
-        detail: ["should have required property 'email'"],
+        detail: ["must have required property 'email'"],
       });
     });
 
@@ -388,7 +388,7 @@ describe("User routes", () => {
 
       expect(body).to.deep.equal({
         error: "Invalid data",
-        detail: ["should have required property 'password'"],
+        detail: ["must have required property 'password'"],
       });
     });
   });

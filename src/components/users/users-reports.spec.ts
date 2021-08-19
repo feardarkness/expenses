@@ -12,6 +12,7 @@ import { UserType } from "../../common/enums/UserType";
 import { Thing } from "../things/things.entity";
 import { Ledger } from "../ledger/ledger.entity";
 import { LedgerEntryType } from "../../common/enums/LedgerEntryType";
+import DateCommon from "../../common/date-common";
 
 let expect = chai.expect;
 chai.use(sinonChai);
@@ -209,7 +210,7 @@ describe("User reports", () => {
       expect(status).to.equal(400);
       expect(body).to.deep.equal({
         error: "Invalid data",
-        detail: ["should have required property 'interval'"],
+        detail: ["must have required property 'interval'"],
       });
     });
 
@@ -221,7 +222,7 @@ describe("User reports", () => {
       expect(status).to.equal(400);
       expect(body).to.deep.equal({
         error: "Invalid data",
-        detail: ["should have required property 'minDate'"],
+        detail: ["must have required property 'minDate'"],
       });
     });
 
@@ -233,7 +234,79 @@ describe("User reports", () => {
       expect(status).to.equal(400);
       expect(body).to.deep.equal({
         error: "Invalid data",
-        detail: ["should have required property 'maxDate'"],
+        detail: ["must have required property 'maxDate'"],
+      });
+    });
+
+    it("should not be able to get daily reports for more than 94 days", async () => {
+      const minDate = "2021-01-01";
+      const maxDate = DateCommon.addTime(new Date(minDate), { days: 96 });
+      const { body, status } = await request(app)
+        .get(
+          `/users/${
+            activeUser.id
+          }/reports?interval=Daily&minDate=${minDate}&&maxDate=${DateCommon.formatDateWithoutTime(maxDate)}`
+        )
+        .set("Authorization", `Bearer ${activeUserJwt}`);
+
+      expect(status).to.equal(400);
+      expect(body).to.deep.equal({
+        error: "Expected range of days is 94 with a Daily interval",
+        detail: [],
+      });
+    });
+
+    it("should not be able to get weekly reports for more than 27 weeks", async () => {
+      const minDate = "2021-01-01";
+      const maxDate = DateCommon.addTime(new Date(minDate), { weeks: 28 });
+      const { body, status } = await request(app)
+        .get(
+          `/users/${
+            activeUser.id
+          }/reports?interval=Weekly&minDate=${minDate}&&maxDate=${DateCommon.formatDateWithoutTime(maxDate)}`
+        )
+        .set("Authorization", `Bearer ${activeUserJwt}`);
+
+      expect(status).to.equal(400);
+      expect(body).to.deep.equal({
+        error: "Expected range of months is six with a Weekly interval",
+        detail: [],
+      });
+    });
+
+    it("should not be able to get monthly reports for more than 12 months", async () => {
+      const minDate = "2021-01-01";
+      const maxDate = DateCommon.addTime(new Date(minDate), { months: 13 });
+      const { body, status } = await request(app)
+        .get(
+          `/users/${
+            activeUser.id
+          }/reports?interval=Monthly&minDate=${minDate}&&maxDate=${DateCommon.formatDateWithoutTime(maxDate)}`
+        )
+        .set("Authorization", `Bearer ${activeUserJwt}`);
+
+      expect(status).to.equal(400);
+      expect(body).to.deep.equal({
+        error: "Expected range of months is twelve with a Monthly interval",
+        detail: [],
+      });
+    });
+
+    it("should not be able to get yearly reports for more than 10 years", async () => {
+      const minDate = "2021-01-01";
+      const maxDate = DateCommon.addTime(new Date(minDate), { years: 11 });
+      const { body, status } = await request(app)
+        .get(
+          `/users/${
+            activeUser.id
+          }/reports?interval=Yearly&minDate=${minDate}&&maxDate=${DateCommon.formatDateWithoutTime(maxDate)}`
+        )
+        .set("Authorization", `Bearer ${activeUserJwt}`);
+
+      expect(status).to.equal(400);
+      expect(body).to.deep.equal({
+        error: "Expected range of years is ten with a Yearly interval",
+        detail: [],
       });
     });
 
@@ -250,10 +323,11 @@ describe("User reports", () => {
         expect(data.groupedDate).to.satisfy((str) => str.startsWith("2021-01-01"));
       });
 
-      const [expense, income] = body.data;
+      const income = body.data.find((d) => d.type === LedgerEntryType.income);
+      const expense = body.data.find((d) => d.type === LedgerEntryType.expense);
 
-      expect(Number(expense.total)).to.equal(-1150.75);
-      expect(Number(income.total)).to.equal(1100.5);
+      expect(expense.total).to.equal("-1150.75");
+      expect(income.total).to.equal("1100.50");
     });
 
     it("should get reports for every month (group by expenseType and interval=month)", async () => {
@@ -266,20 +340,21 @@ describe("User reports", () => {
 
       body.data.forEach((data) => expect(data).to.have.all.keys(["groupedDate", "total", "type"]));
 
-      const [juneExpense, juneIncome, mayExpense, mayIncome] = body.data;
+      const [juneIncome, mayIncome] = body.data.filter((d) => d.type === LedgerEntryType.income);
+      const [juneExpense, mayExpense] = body.data.filter((d) => d.type === LedgerEntryType.expense);
 
-      expect(Number(juneExpense.total)).to.equal(-700.75);
-      expect(Number(juneIncome.total)).to.equal(500);
+      expect(juneExpense.total).to.equal("-700.75");
+      expect(juneIncome.total).to.equal("500.00");
       expect(juneExpense.groupedDate).to.satisfy((str) => str.startsWith("2021-06-01"));
       expect(juneIncome.groupedDate).to.satisfy((str) => str.startsWith("2021-06-01"));
 
-      expect(Number(mayExpense.total)).to.equal(-450);
-      expect(Number(mayIncome.total)).to.equal(600.5);
+      expect(mayExpense.total).to.equal("-450.00");
+      expect(mayIncome.total).to.equal("600.50");
       expect(mayExpense.groupedDate).to.satisfy((str) => str.startsWith("2021-05-01"));
       expect(mayIncome.groupedDate).to.satisfy((str) => str.startsWith("2021-05-01"));
     });
 
-    it("should get reports for every day (group by expenseType and interval=daily)", async () => {
+    it("should get reports for every day (group by entryType (default) and interval=daily)", async () => {
       const { body, status } = await request(app)
         .get(`/users/${activeUser.id}/reports?interval=Daily&minDate=2021-06-01&&maxDate=2021-06-30`)
         .set("Authorization", `Bearer ${activeUserJwt}`);
@@ -287,22 +362,33 @@ describe("User reports", () => {
       expect(status).to.equal(200);
       expect(body).to.have.all.keys(["data"]);
 
-      expect(body.data).to.have.length(3);
+      expect(body.data).to.have.length(60); // 30 days * 2 ledger types (income, expense)
 
       body.data.forEach((data) => expect(data).to.have.all.keys(["groupedDate", "total", "type"]));
 
-      const [data1, data2, data3] = body.data;
-      expect(data1.groupedDate).to.satisfy((d) => d.startsWith("2021-06-30"));
-      expect(Number(data1.total)).to.equal(-550.5);
+      const incomes = body.data.filter((d) => d.type === LedgerEntryType.income);
+      const expenses = body.data.filter((d) => d.type === LedgerEntryType.expense);
 
-      expect(data2.groupedDate).to.satisfy((d) => d.startsWith("2021-06-13"));
-      expect(Number(data2.total)).to.equal(-150.25);
+      expect(incomes).to.have.length(30);
+      expect(expenses).to.have.length(30);
 
-      expect(data3.groupedDate).to.satisfy((d) => d.startsWith("2021-06-01"));
-      expect(Number(data3.total)).to.equal(500);
+      const [income1, income2] = incomes.filter((i) => i.total !== "0");
+      const [expense1, expense2, expense3] = expenses.filter((i) => i.total !== "0");
+
+      expect(income2).to.be.undefined; // only one income with total !== 0
+      expect(expense3).to.be.undefined; // only two expenses with total !== 0
+
+      expect(expense1.groupedDate).to.satisfy((d) => d.startsWith("2021-06-30"));
+      expect(expense1.total).to.equal("-550.50");
+
+      expect(expense2.groupedDate).to.satisfy((d) => d.startsWith("2021-06-13"));
+      expect(expense2.total).to.equal("-150.25");
+
+      expect(income1.groupedDate).to.satisfy((d) => d.startsWith("2021-06-01"));
+      expect(income1.total).to.equal("500.00");
     });
 
-    it("should get reports for every day (group by expenseType and interval=daily)", async () => {
+    it("should get reports for every day (group by entryType and interval=daily)", async () => {
       const { body, status } = await request(app)
         .get(`/users/${activeUser.id}/reports?interval=Daily&minDate=2021-06-01&maxDate=2021-06-30&groupBy[]=EntryType`)
         .set("Authorization", `Bearer ${activeUserJwt}`);
@@ -310,42 +396,87 @@ describe("User reports", () => {
       expect(status).to.equal(200);
       expect(body).to.have.all.keys(["data"]);
 
-      expect(body.data).to.have.length(3);
+      expect(body.data).to.have.length(60); // 30 days * 2 ledger types (income, expense)
 
       body.data.forEach((data) => expect(data).to.have.all.keys(["groupedDate", "total", "type"]));
 
-      const [data1, data2, data3] = body.data;
-      expect(data1.groupedDate).to.satisfy((d) => d.startsWith("2021-06-30"));
-      expect(Number(data1.total)).to.equal(-550.5);
+      const incomes = body.data.filter((d) => d.type === LedgerEntryType.income);
+      const expenses = body.data.filter((d) => d.type === LedgerEntryType.expense);
 
-      expect(data2.groupedDate).to.satisfy((d) => d.startsWith("2021-06-13"));
-      expect(Number(data2.total)).to.equal(-150.25);
+      expect(incomes).to.have.length(30);
+      expect(expenses).to.have.length(30);
 
-      expect(data3.groupedDate).to.satisfy((d) => d.startsWith("2021-06-01"));
-      expect(Number(data3.total)).to.equal(500);
+      const [income1, income2] = incomes.filter((i) => i.total !== "0");
+      const [expense1, expense2, expense3] = expenses.filter((i) => i.total !== "0");
+
+      expect(income2).to.be.undefined; // only one income with total !== 0
+      expect(expense3).to.be.undefined; // only two expenses with total !== 0
+
+      expect(expense1.groupedDate).to.satisfy((d) => d.startsWith("2021-06-30"));
+      expect(expense1.total).to.equal("-550.50");
+
+      expect(expense2.groupedDate).to.satisfy((d) => d.startsWith("2021-06-13"));
+      expect(expense2.total).to.equal("-150.25");
+
+      expect(income1.groupedDate).to.satisfy((d) => d.startsWith("2021-06-01"));
+      expect(income1.total).to.equal("500.00");
     });
 
     it("should get reports for every day (group by thing and interval=monthly)", async () => {
       const { body, status } = await request(app)
-        .get(`/users/${activeUser.id}/reports?interval=Monthly&minDate=2021-06-01&maxDate=2021-06-30&groupBy[]=Thing`)
+        .get(`/users/${activeUser.id}/reports?interval=Monthly&minDate=2021-06-01&maxDate=2021-07-30&groupBy[]=Thing`)
         .set("Authorization", `Bearer ${activeUserJwt}`);
 
       expect(status).to.equal(200);
       expect(body).to.have.all.keys(["data"]);
 
-      expect(body.data).to.have.length(3);
+      expect(body.data).to.have.length(6);
+      body.data.forEach((item) => {
+        expect(item).to.satisfy(
+          (d) => d?.groupedDate?.startsWith("2021-06-01") || d?.groupedDate?.startsWith("2021-07-01")
+        );
+      });
 
-      body.data.forEach((data) => expect(data).to.have.all.keys(["groupedDate", "total", "thingId"]));
+      const thing1Results = body.data.filter((d) => d.thingId === thing1.id);
+      const thing2Results = body.data.filter((d) => d.thingId === thing2.id);
+      const thing3Results = body.data.filter((d) => d.thingId === thing3.id);
 
-      const [data1, data2, data3] = body.data;
-      expect(data1.groupedDate).to.satisfy((d) => d.startsWith("2021-06-01"));
-      expect([349.75, -400.25, -150.25]).to.include(Number(data1.total));
-
-      expect(data2.groupedDate).to.satisfy((d) => d.startsWith("2021-06-01"));
-      expect([349.75, -400.25, -150.25]).to.include(Number(data2.total));
-
-      expect(data3.groupedDate).to.satisfy((d) => d.startsWith("2021-06-01"));
-      expect([349.75, -400.25, -150.25]).to.include(Number(data3.total));
+      expect(thing1Results).to.deep.equal([
+        {
+          groupedDate: "2021-07-01T04:00:00.000Z",
+          total: "0",
+          thingId: thing1.id,
+        },
+        {
+          groupedDate: "2021-06-01T04:00:00.000Z",
+          total: "349.75",
+          thingId: thing1.id,
+        },
+      ]);
+      expect(thing2Results).to.deep.equal([
+        {
+          groupedDate: "2021-07-01T04:00:00.000Z",
+          total: "0",
+          thingId: thing2.id,
+        },
+        {
+          groupedDate: "2021-06-01T04:00:00.000Z",
+          total: "-400.25",
+          thingId: thing2.id,
+        },
+      ]);
+      expect(thing3Results).to.deep.equal([
+        {
+          groupedDate: "2021-07-01T04:00:00.000Z",
+          total: "0",
+          thingId: thing3.id,
+        },
+        {
+          groupedDate: "2021-06-01T04:00:00.000Z",
+          total: "-150.25",
+          thingId: thing3.id,
+        },
+      ]);
     });
 
     it("should get reports for incorrect interval", async () => {
@@ -356,7 +487,7 @@ describe("User reports", () => {
       expect(status).to.equal(400);
       expect(body).to.deep.equal({
         error: "Invalid data",
-        detail: ["interval should be equal to one of the allowed values [Monthly,Yearly,Weekly,Daily]."],
+        detail: ["interval must be equal to one of the allowed values [Monthly,Yearly,Weekly,Daily]."],
       });
     });
   });

@@ -6,6 +6,7 @@ import authMiddleware from "../../common/middlewares/authorization";
 import validateMiddleware from "../../common/middlewares/validation";
 import asyncWrapper from "../../common/async-wrapper";
 import { UserType } from "../../common/enums/UserType";
+import usersReportsMiddleware from "./users-reports.middleware";
 
 export class UserRoutes extends CommonRoutesConfig {
   constructor() {
@@ -41,7 +42,8 @@ export class UserRoutes extends CommonRoutesConfig {
         asyncWrapper(authMiddleware.userTypeAllowed([UserType.user])),
         asyncWrapper(validateMiddleware.validateUuidInPath("userId")),
         asyncWrapper(userMiddleware.validateUserAllowedByToken),
-        asyncWrapper(validateMiddleware.validateData("reportQuerySchema", "query"))
+        asyncWrapper(validateMiddleware.validateData("reportQuerySchema", "query")),
+        asyncWrapper(usersReportsMiddleware.validateDateRangeForReportInterval)
       )
       .get(`/:userId/reports`, asyncWrapper(userController.generateReport));
 
