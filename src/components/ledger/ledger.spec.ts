@@ -455,8 +455,8 @@ describe("Ledger routes", () => {
       expect(status).to.equal(400);
     });
 
-    it("should fail if amount is positive and is an Expense", async () => {
-      let amount = 90.7;
+    it("should fail if amount is negative and is an Expense", async () => {
+      let amount = -90.7;
       let date = "2021-05-23";
       const { body, status } = await request(app)
         .post("/ledgers")
@@ -471,7 +471,7 @@ describe("Ledger routes", () => {
       expect(status).to.equal(400);
     });
 
-    it("should work if amount is 0", async () => {
+    it("should work if amount is 0 and expense", async () => {
       let amount = 0.0;
       let date = "2021-05-23";
       const { body, status } = await request(app)
@@ -492,6 +492,29 @@ describe("Ledger routes", () => {
       expect(body.userId).to.equal(user1.id);
       expect(body.date).to.equal(date);
       expect(body.type).to.equal(LedgerEntryType.expense);
+    });
+
+    it("should work if amount is 0 and income", async () => {
+      let amount = 0.0;
+      let date = "2021-05-23";
+      const { body, status } = await request(app)
+        .post("/ledgers")
+        .send({
+          amount,
+          type: LedgerEntryType.income,
+          thingId: thing1user1.id,
+          date,
+        })
+        .set("Authorization", `Bearer ${user1JWT}`);
+
+      expect(status).to.equal(201);
+      expect(body).to.have.all.keys(["id", "amount", "thingId", "userId", "date", "createdAt", "updatedAt", "type"]);
+
+      expect(body.amount).to.equal(amount);
+      expect(body.thingId).to.equal(thing1user1.id);
+      expect(body.userId).to.equal(user1.id);
+      expect(body.date).to.equal(date);
+      expect(body.type).to.equal(LedgerEntryType.income);
     });
 
     it("should fail without a valid JTW", async () => {
@@ -525,7 +548,7 @@ describe("Ledger routes", () => {
     });
 
     it("should create an entry (expense)", async () => {
-      let amount = -90.7;
+      let amount = 90.7;
       let date = "2021-05-23";
       const { body, status } = await request(app)
         .post("/ledgers")
@@ -553,6 +576,27 @@ describe("Ledger routes", () => {
         .send({
           amount,
           type: LedgerEntryType.income,
+          thingId: thing1user1.id,
+          date,
+        })
+        .set("Authorization", `Bearer ${user1JWT}`);
+
+      expect(status).to.equal(201);
+
+      expect(body.amount).to.equal(amount);
+      expect(body.thingId).to.equal(thing1user1.id);
+      expect(body.userId).to.equal(user1.id);
+      expect(body.date).to.equal(date);
+    });
+
+    it("should create an entry (expense)", async () => {
+      let amount = 90.7;
+      let date = "2021-05-23";
+      const { body, status } = await request(app)
+        .post("/ledgers")
+        .send({
+          amount,
+          type: LedgerEntryType.expense,
           thingId: thing1user1.id,
           date,
         })

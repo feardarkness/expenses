@@ -54,6 +54,7 @@ const ledgerSchema: JSONSchemaType<LedgerDto> = {
     amount: {
       type: "number",
       multipleOf: 0.01,
+      minimum: 0,
     },
     thingId: {
       type: "string",
@@ -71,31 +72,31 @@ const ledgerSchema: JSONSchemaType<LedgerDto> = {
   },
   required: ["amount", "thingId", "date", "type"],
   additionalProperties: false,
-  if: {
-    properties: {
-      type: {
-        const: LedgerEntryType.expense,
-      },
-    },
-  },
-  then: {
-    properties: {
-      amount: {
-        type: "number",
-        multipleOf: 0.01,
-        maximum: 0,
-      },
-    },
-  },
-  else: {
-    properties: {
-      amount: {
-        type: "number",
-        multipleOf: 0.01,
-        minimum: 0,
-      },
-    },
-  },
+  // if: {
+  //   properties: {
+  //     type: {
+  //       const: LedgerEntryType.expense,
+  //     },
+  //   },
+  // },
+  // then: {
+  //   properties: {
+  //     amount: {
+  //       type: "number",
+  //       multipleOf: 0.01,
+  //       maximum: 0,
+  //     },
+  //   },
+  // },
+  // else: {
+  //   properties: {
+  //     amount: {
+  //       type: "number",
+  //       multipleOf: 0.01,
+  //       minimum: 0,
+  //     },
+  //   },
+  // },
 };
 
 const ledgerUpdateSchema: JSONSchemaType<LedgerDto> = {
